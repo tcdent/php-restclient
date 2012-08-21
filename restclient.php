@@ -3,7 +3,7 @@
 /**
  * Usage:
  * 
- * $api = new RestClient(
+ * $api = new RestClient(array(
  *     'base_url' => "http://api.twitter.com/1/", 
  *     'format' => "json"
  * );
