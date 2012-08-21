@@ -6,7 +6,7 @@
  * $api = new RestClient(array(
  *     'base_url' => "http://api.twitter.com/1/", 
  *     'format' => "json"
- * );
+ * ));
  * $result = $api->get("statuses/public_timeline");
  * if($result->info->http_code < 400)
  *     json_decode($result->response);
