@@ -55,7 +55,9 @@ class RestClient {
             'base_url' => NULL, 
             'format' => NULL, 
             'username' => NULL, 
-            'password' => NULL
+            'password' => NULL,
+            'apikey' => NULL,
+            'apikey_parameter' => "apikey"
         ), $options);
     }
     
@@ -139,6 +141,11 @@ class RestClient {
         
         if($client->options['format'])
             $client->url .= '.'.$client->options['format'];
+        
+        
+        if ($this->options['apikey'] != NULL) {
+          $parameters[$this->options['apikey_parameter']] = $this->options['apikey'];
+        }
         
         if(strtoupper($method) == 'POST'){
             $curlopt[CURLOPT_POST] = TRUE;
