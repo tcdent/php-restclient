@@ -55,7 +55,9 @@ class RestClient {
             'base_url' => NULL, 
             'format' => NULL, 
             'username' => NULL, 
-            'password' => NULL
+            'password' => NULL,
+            'apikey' => NULL,
+            'apikey_parameter' => "apikey"
         ), $options);
     }
     
@@ -64,11 +66,17 @@ class RestClient {
     }
     
     public function get($url, $parameters=array(), $headers=array()){
-        return $this->execute($url, 'GET', $parameters, $headers);
+        return $this->execute($url, 'GET', NULL, $parameters, $headers);
     }
     
     public function post($url, $parameters=array(), $headers=array()){
-        return $this->execute($url, 'POST', $parameters, $headers);
+        return $this->execute($url, 'POST', NULL, $parameters, $headers);
+    }
+    
+    public function postJson($url, $body="{}", $parameters=array(), $headers=array()){
+        $headers["Content-Type"] = "application/json";
+        $headers["Content-Length"] = strlen($body);
+        return $this->execute($url, 'POST', $body, $parameters, $headers);
     }
     
     public function put($url, $parameters=array(), $headers=array()){
@@ -76,11 +84,16 @@ class RestClient {
         return $this->post($url, $parameters, $headers);
     }
     
+    public function putJson($url, $body="{}", $parameters=array(), $headers=array()){
+        $parameters['_method'] = "PUT";
+        return $this->postJson($url, $body, $parameters, $headers);
+    }
+    
     public function delete($url, $parameters=array(), $headers=array()){
         $parameters['_method'] = "DELETE";
         return $this->post($url, $parameters, $headers);
     }
-    
+   
     public function format_query($parameters, $primary='=', $secondary='&'){
         $query = "";
         foreach($parameters as $key => $value){
@@ -115,7 +128,7 @@ class RestClient {
         $this->response = strtok("");
     }
     
-    public function execute($url, $method='GET', $parameters=array(), $headers=array()){
+    public function execute($url, $method='GET', $body=NULL, $parameters=array(), $headers=array()){
         $client = clone $this;
         $client->url = $url;
         $client->handle = curl_init();
@@ -140,9 +153,22 @@ class RestClient {
         if($client->options['format'])
             $client->url .= '.'.$client->options['format'];
         
-        if(strtoupper($method) == 'POST'){
+        
+        if ($this->options['apikey'] != NULL) {
+          $parameters[$this->options['apikey_parameter']] = $this->options['apikey'];
+        }
+        
+        if(strtoupper($method) == 'POST') {
             $curlopt[CURLOPT_POST] = TRUE;
-            $curlopt[CURLOPT_POSTFIELDS] = $client->format_query($parameters);
+            if ($body == NULL) {
+              $curlopt[CURLOPT_POSTFIELDS] = $client->format_query($parameters);
+            } else {
+              if(count($parameters)) {
+                  $client->url .= strpos($client->url, '?')? '&' : '?';
+                  $client->url .= $client->format_query($parameters);
+              }
+              $curlopt[CURLOPT_POSTFIELDS] = $body;
+            }
         }
         elseif(count($parameters)){
             $client->url .= strpos($client->url, '?')? '&' : '?';
