@@ -115,7 +115,7 @@ created with `create_function` work, too.
 
     $api = new RestClient(array(
         'format' => "xml", 
-        'decoders' => array('xml' => "my_xml_handler")
+        'decoders' => array('xml' => "my_xml_decoder")
     ));
 
 -or-
