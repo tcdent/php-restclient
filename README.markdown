@@ -43,13 +43,50 @@ Options can be set upon instantiation, or individually afterword:
     $api->set_option('format', "json");
     $api->set_option('user_agent', "my-application/0.1");
 
+Verbs
+-----
+Four HTTP verbs are implemented as convenience methods: `get()`, `post()`, `put()` and `delete()`. Each accepts three arguments:  
+
+`url` - URL of the resource you are requesting. Will be prepended with the value of the `base_url` option, if it has been configured. Will be appended with the value of the `format` option, if it has been configured.  
+`parameters` - An associative array of query parameters, which will be formatted with the URL in `GET` requests, and passed in the request body on all others.  
+`headers` - An associative array of headers to include with the request. 
+
+You can make a request using any verb by calling `execute()` directly, which accepts four arguments: `url`, `method`, `parameters` and `headers`. All arguments expect the same values as in the convenience methods, with the exception of the additional `method` argument:
+
+`method` - HTTP verb to perform the request with. 
+
+
+Not all endpoints support all HTTP verbs
+----------------------------------------
+These are examples of two common workarounds, but are entirely dependent on the endpoint you are accessing. Consult the service's documentation to see if this is required. 
+
+Passing an `X-HTTP-Method-Override` header:
+
+    $result = $api->post("put_resource", array(), array(
+        'X-HTTP-Method-Override' => "PUT"
+    ));
+
+Passing a `_method` parameter: 
+
+    $result = $api->post("put_resource", array(
+        '_method' => "PUT"
+    ));
+
+
+Attributes populated after making a request
+-------------------------------------------
+`response` - Plain text response body.  
+`headers` - Parsed response header object.  
+`info` - cURL response info object.  
+`error` - Response error string.  
+
 
 Direct Iteration and Response Decoding
 --------------------------------------
 If the the response data format is supported, the response will be decoded 
 and accessible by iterating over the returned instance. When the `format` 
 option is set, it will be used to select the decoder. If no `format` option 
-is provided, an attempt is made to extract it from the response Content-Type 
+is provided, an attempt is made to extract it from the response `Content-Type` 
 header. This pattern is configurable with the `format_regex` option.
 
     $api = new RestClient(array(

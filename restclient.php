@@ -28,7 +28,7 @@ class RestClient implements Iterator, ArrayAccess {
             'headers' => array(), 
             'parameters' => array(), 
             'curl_options' => array(), 
-            'user_agent' => "PHP RestClient/0.1.1", 
+            'user_agent' => "PHP RestClient/0.1.2", 
             'base_url' => NULL, 
             'format' => NULL, 
             'format_regex' => "/(\w+)\/(\w+)(;[.+])?/",
@@ -113,13 +113,11 @@ class RestClient implements Iterator, ArrayAccess {
     }
     
     public function put($url, $parameters=array(), $headers=array()){
-        $parameters['_method'] = "PUT";
-        return $this->execute($url, 'POST', $parameters, $headers);
+        return $this->execute($url, 'PUT', $parameters, $headers);
     }
     
     public function delete($url, $parameters=array(), $headers=array()){
-        $parameters['_method'] = "DELETE";
-        return $this->execute($url, 'POST', $parameters, $headers);
+        return $this->execute($url, 'DELETE', $parameters, $headers);
     }
     
     public function execute($url, $method='GET', $parameters=array(), $headers=array()){
@@ -150,6 +148,10 @@ class RestClient implements Iterator, ArrayAccess {
         $parameters = array_merge($client->options['parameters'], $parameters);
         if(strtoupper($method) == 'POST'){
             $curlopt[CURLOPT_POST] = TRUE;
+            $curlopt[CURLOPT_POSTFIELDS] = $client->format_query($parameters);
+        }
+        elseif(strtoupper($method) != 'GET'){
+            $curlopt[CURLOPT_CUSTOMREQUEST] = strtoupper($method);
             $curlopt[CURLOPT_POSTFIELDS] = $client->format_query($parameters);
         }
         elseif(count($parameters)){
@@ -243,4 +245,5 @@ class RestClient implements Iterator, ArrayAccess {
         return $this->decoded_response;
     }
 }
+
 
