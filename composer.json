@@ -20,5 +20,8 @@
         "php": ">=5.2", 
         "ext-curl": "*", 
         "ext-json": "*"
+    }, 
+    "autoload": {
+        "files": ["restclient.php"]
     }
 }
