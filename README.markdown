@@ -2,6 +2,11 @@ PHP REST Client
 ===============
 (c) 2013 Travis Dent <tcdent@gmail.com>
 
+Installation
+-----------
+
+    $ php composer.phar require tcdent/php-restclient
+
 Basic Usage
 -----------
 
