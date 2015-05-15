@@ -112,6 +112,14 @@ class RestClient implements Iterator, ArrayAccess {
         return $this->execute($url, 'POST', $parameters, $headers);
     }
     
+    public function post_json($url, $parameters=array(), $headers=array()){
+        return $this->execute($url, 'POST_JSON', $parameters, $headers);
+    }
+    
+    public function patch_json($url, $parameters=array(), $headers=array()){
+        return $this->execute($url, 'PATCH_JSON', $parameters, $headers);
+    }
+    
     public function put($url, $parameters=array(), $headers=array()){
         return $this->execute($url, 'PUT', $parameters, $headers);
     }
@@ -134,6 +142,15 @@ class RestClient implements Iterator, ArrayAccess {
             $curlopt[CURLOPT_USERPWD] = sprintf("%s:%s", 
                 $client->options['username'], $client->options['password']);
         
+        if(strtoupper($method) == 'POST_JSON'){
+            $headers['Content-Type'] = 'application/json';
+        }
+        
+        if(strtoupper($method) == 'PATCH_JSON'){
+            $headers['Content-Type'] = 'application/json';
+            $headers['X-HTTP-Method-Override'] = 'PATCH';
+        }
+        
         if(count($client->options['headers']) || count($headers)){
             $curlopt[CURLOPT_HTTPHEADER] = array();
             $headers = array_merge($client->options['headers'], $headers);
@@ -145,16 +162,26 @@ class RestClient implements Iterator, ArrayAccess {
         if($client->options['format'])
             $client->url .= '.'.$client->options['format'];
         
-        $parameters = array_merge($client->options['parameters'], $parameters);
-        if(strtoupper($method) == 'POST'){
+        if(strtoupper($method) == 'POST_JSON'){
+            $curlopt[CURLOPT_POST] = TRUE;
+            $curlopt[CURLOPT_POSTFIELDS] = json_encode($parameters);
+        }
+        elseif(strtoupper($method) == 'PATCH_JSON'){
+            $curlopt[CURLOPT_POST] = TRUE;
+            $curlopt[CURLOPT_CUSTOMREQUEST] = 'PATCH';
+            $curlopt[CURLOPT_POSTFIELDS] = json_encode($parameters);
+        }
+        elseif(strtoupper($method) == 'POST'){
             $curlopt[CURLOPT_POST] = TRUE;
             $curlopt[CURLOPT_POSTFIELDS] = $client->format_query($parameters);
         }
         elseif(strtoupper($method) != 'GET'){
+            $parameters = array_merge($client->options['parameters'], $parameters);
             $curlopt[CURLOPT_CUSTOMREQUEST] = strtoupper($method);
             $curlopt[CURLOPT_POSTFIELDS] = $client->format_query($parameters);
         }
         elseif(count($parameters)){
+            $parameters = array_merge($client->options['parameters'], $parameters);
             $client->url .= strpos($client->url, '?')? '&' : '?';
             $client->url .= $client->format_query($parameters);
         }
