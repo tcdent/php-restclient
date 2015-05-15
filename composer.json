@@ -1,5 +1,5 @@
 {
-    "name": "uldisn/php-restclient", 
+    "name": "tcdent/php-restclient",
     "description": "A generic REST API client for PHP", 
     "type": "library", 
     "keywords": ["REST", "api", "client", "curl", "JSON", "XML"], 
