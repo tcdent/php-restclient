@@ -159,3 +159,16 @@ particular example allows you to receive decoded JSON data as an array.
         create_function('$a', "return json_decode(\$a, TRUE);"));
 
 
+Tests
+-----
+The test package includes a simple server script which returns debug information for verifying functionality. Start the server first, then run tests:
+
+    $ php -S localhost:8888 test.php
+    $ phpunit test
+
+* Requires PHP > 5.5.7 in order for `getallheaders` data to populate.
+* If you specify an alternate port number or hostname to the PHP server you need to re-configure it in your `phpunit.xml` file:
+
+    ```<php><var name="TEST_SERVER_URL" value="http://localhost:8888"/></php>```
+
+
