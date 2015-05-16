@@ -28,7 +28,7 @@ class RestClient implements Iterator, ArrayAccess {
             'headers' => array(), 
             'parameters' => array(), 
             'curl_options' => array(), 
-            'user_agent' => "PHP RestClient/0.1.3", 
+            'user_agent' => "PHP RestClient/0.1.4", 
             'base_url' => NULL, 
             'format' => NULL, 
             'format_regex' => "/(\w+)\/(\w+)(;[.+])?/",
@@ -145,18 +145,27 @@ class RestClient implements Iterator, ArrayAccess {
         if($client->options['format'])
             $client->url .= '.'.$client->options['format'];
         
-        $parameters = array_merge($client->options['parameters'], $parameters);
+        // Allow passing parameters as a pre-encoded string (or something that
+        // allows casting to a string). Parameters passed as strings will not be
+        // merged with parameters specified in the default options.
+        if(is_array($parameters)){
+            $parameters = array_merge($client->options['parameters'], $parameters);
+            $paraeters_string = $client->format_query($parameters);
+        }
+        else
+            $paraeters_string = (string) $parameters;
+        
         if(strtoupper($method) == 'POST'){
             $curlopt[CURLOPT_POST] = TRUE;
-            $curlopt[CURLOPT_POSTFIELDS] = $client->format_query($parameters);
+            $curlopt[CURLOPT_POSTFIELDS] = $paraeters_string;
         }
         elseif(strtoupper($method) != 'GET'){
             $curlopt[CURLOPT_CUSTOMREQUEST] = strtoupper($method);
-            $curlopt[CURLOPT_POSTFIELDS] = $client->format_query($parameters);
+            $curlopt[CURLOPT_POSTFIELDS] = $paraeters_string;
         }
-        elseif(count($parameters)){
+        elseif($parameters_string){
             $client->url .= strpos($client->url, '?')? '&' : '?';
-            $client->url .= $client->format_query($parameters);
+            $client->url .= $parameters_string;
         }
         
         if($client->options['base_url']){

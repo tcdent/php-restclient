@@ -52,13 +52,36 @@ Verbs
 -----
 Four HTTP verbs are implemented as convenience methods: `get()`, `post()`, `put()` and `delete()`. Each accepts three arguments:  
 
-`url` - URL of the resource you are requesting. Will be prepended with the value of the `base_url` option, if it has been configured. Will be appended with the value of the `format` option, if it has been configured.  
-`parameters` - An associative array of query parameters, which will be formatted with the URL in `GET` requests, and passed in the request body on all others.  
-`headers` - An associative array of headers to include with the request. 
+`url` - `string` URL of the resource you are requesting. Will be prepended with the value of the `base_url` option, if it has been configured. Will be appended with the value of the `format` option, if it has been configured.  
+
+`parameters` - `string` or associative `array` to be appended to the URL in `GET` requests and passed in the request body on all others. If an array is passed it will be encoded into a query string.
+
+`headers` - An associative `array` of headers to include with the request. 
 
 You can make a request using any verb by calling `execute()` directly, which accepts four arguments: `url`, `method`, `parameters` and `headers`. All arguments expect the same values as in the convenience methods, with the exception of the additional `method` argument:
 
-`method` - HTTP verb to perform the request with. 
+`method` - `string` HTTP verb to perform the request with. 
+
+
+JSON Verbs
+----------
+This library will never validate or construct `PATCH JSON` content, but it can be configured to communicate well-formed data.
+
+`PATCH JSON` content with correct content type:
+
+    $result = $api->execute("http://httpbin.org/patch", 'PATCH',
+        json_encode(array('foo' => 'bar')),
+        array(
+            'X-HTTP-Method-Override' => 'PATCH', 
+            'Content-Type' => 'application/json-patch+json'));
+
+Note that your specific endpoint may not require the `X-HTTP-Method-Override` header, nor understand the [correct](http://tools.ietf.org/html/rfc6902#section-6) `application/json-patch+json` content type. 
+
+`POST JSON` content with correct content type:
+
+    $result = $api->post("http://httpbin.org/post",
+        json_encode(array('foo' => 'bar')),
+        array('Content-Type' => 'application/json'));
 
 
 Not all endpoints support all HTTP verbs

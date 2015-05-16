@@ -1,6 +1,6 @@
 {
     "name": "tcdent/php-restclient", 
-    "version": "0.1.3", 
+    "version": "0.1.4", 
     "description": "A generic REST API client for PHP", 
     "type": "library", 
     "keywords": ["REST", "api", "client", "curl", "JSON", "XML"], 
