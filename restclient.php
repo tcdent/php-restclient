@@ -150,18 +150,18 @@ class RestClient implements Iterator, ArrayAccess {
         // merged with parameters specified in the default options.
         if(is_array($parameters)){
             $parameters = array_merge($client->options['parameters'], $parameters);
-            $paraeters_string = $client->format_query($parameters);
+            $parameters_string = $client->format_query($parameters);
         }
         else
-            $paraeters_string = (string) $parameters;
+            $parameters_string = (string) $parameters;
         
         if(strtoupper($method) == 'POST'){
             $curlopt[CURLOPT_POST] = TRUE;
-            $curlopt[CURLOPT_POSTFIELDS] = $paraeters_string;
+            $curlopt[CURLOPT_POSTFIELDS] = $parameters_string;
         }
         elseif(strtoupper($method) != 'GET'){
             $curlopt[CURLOPT_CUSTOMREQUEST] = strtoupper($method);
-            $curlopt[CURLOPT_POSTFIELDS] = $paraeters_string;
+            $curlopt[CURLOPT_POSTFIELDS] = $parameters_string;
         }
         elseif($parameters_string){
             $client->url .= strpos($client->url, '?')? '&' : '?';
