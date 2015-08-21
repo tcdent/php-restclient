@@ -66,7 +66,7 @@ Response Details
 ----------------
 After making a request with one of the HTTP verb methods, or `execute`, the returned instance will have the folowing data populated:
 
-`response` `(string)`- The raw response body content. See "Direct Iteration and Response Decoding" for ways to parse and access this data.
+`response` `(string)`- The raw response body content. See ["Direct Iteration and Response Decoding"](#direct-iteration-and-response-decoding) for ways to parse and access this data.
 
 `headers` `(object)` - An object with all of the response headers populated. Indexes are transformed to `snake_case` for access:
 
