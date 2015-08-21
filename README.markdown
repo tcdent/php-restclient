@@ -52,61 +52,36 @@ Verbs
 -----
 Four HTTP verbs are implemented as convenience methods: `get()`, `post()`, `put()` and `delete()`. Each accepts three arguments:  
 
-`url` - `string` URL of the resource you are requesting. Will be prepended with the value of the `base_url` option, if it has been configured. Will be appended with the value of the `format` option, if it has been configured.  
+`url` `(string)` - URL of the resource you are requesting. Will be prepended with the value of the `base_url` option, if it has been configured. Will be appended with the value of the `format` option, if it has been configured.  
 
-`parameters` - `string` or associative `array` to be appended to the URL in `GET` requests and passed in the request body on all others. If an array is passed it will be encoded into a query string.
+`parameters` `(string), (array)` - String or associative array to be appended to the URL in `GET` requests and passed in the request body on all others. If an array is passed it will be encoded into a query string.
 
-`headers` - An associative `array` of headers to include with the request. 
+`headers` `(array)` - An associative array of headers to include with the request. 
 
 You can make a request using any verb by calling `execute()` directly, which accepts four arguments: `url`, `method`, `parameters` and `headers`. All arguments expect the same values as in the convenience methods, with the exception of the additional `method` argument:
 
-`method` - `string` HTTP verb to perform the request with. 
+`method` `(string)` - HTTP verb to perform the request with. 
 
+Response Details
+----------------
+After making a request with one of the HTTP verb methods, or `execute`, the returned instance will have the folowing data populated:
 
-JSON Verbs
-----------
-This library will never validate or construct `PATCH JSON` content, but it can be configured to communicate well-formed data.
+`response` `(string)`- The raw response body content. See "Direct Iteration and Response Decoding" for ways to parse and access this data.
 
-`PATCH JSON` content with correct content type:
+`headers` `(object)` - An object with all of the response headers populated. Indexes are transformed to `snake_case` for access:
 
-    $result = $api->execute("http://httpbin.org/patch", 'PATCH',
-        json_encode(array('foo' => 'bar')),
-        array(
-            'X-HTTP-Method-Override' => 'PATCH', 
-            'Content-Type' => 'application/json-patch+json'));
+    $response->headers->content_type;
+    $response->headers->x_powered_by;
 
-Note that your specific endpoint may not require the `X-HTTP-Method-Override` header, nor understand the [correct](http://tools.ietf.org/html/rfc6902#section-6) `application/json-patch+json` content type. 
+`info` `(object)` - An object with information about the transaction. Populated by casting `curl_info` to an object. See PHP documentation for more info: http://php.net/manual/en/function.curl-getinfo.php Available attributes are: 
 
-`POST JSON` content with correct content type:
+    `url`, `content_type`, `http_code`, `header_size`, `request_size`, `filetime`, 
+    `ssl_verify_result`, `redirect_count`, `total_time`, `namelookup_time`, `connect_time`, 
+    `pretransfer_time`, `size_upload`, `size_download`, `speed_download`, `speed_upload`, 
+    `download_content_length`, `upload_content_length`, `starttransfer_time`, `redirect_time`, 
+    `certinfo`, `primary_ip`, `primary_port`, `local_ip`, `local_port`, `redirect_url`  
 
-    $result = $api->post("http://httpbin.org/post",
-        json_encode(array('foo' => 'bar')),
-        array('Content-Type' => 'application/json'));
-
-
-Not all endpoints support all HTTP verbs
-----------------------------------------
-These are examples of two common workarounds, but are entirely dependent on the endpoint you are accessing. Consult the service's documentation to see if this is required. 
-
-Passing an `X-HTTP-Method-Override` header:
-
-    $result = $api->post("put_resource", array(), array(
-        'X-HTTP-Method-Override' => "PUT"
-    ));
-
-Passing a `_method` parameter: 
-
-    $result = $api->post("put_resource", array(
-        '_method' => "PUT"
-    ));
-
-
-Attributes populated after making a request
--------------------------------------------
-`response` - Plain text response body.  
-`headers` - Parsed response header object.  
-`info` - cURL response info object.  
-`error` - Response error string.  
+`error` `(string)` - cURL error message, if applicable.
 
 
 Direct Iteration and Response Decoding
@@ -157,6 +132,44 @@ particular example allows you to receive decoded JSON data as an array.
 
     $api->register_decoder('json', 
         create_function('$a', "return json_decode(\$a, TRUE);"));
+
+
+JSON Verbs
+----------
+This library will never validate or construct `PATCH JSON` content, but it can be configured to communicate well-formed data.
+
+`PATCH JSON` content with correct content type:
+
+    $result = $api->execute("http://httpbin.org/patch", 'PATCH',
+        json_encode(array('foo' => 'bar')),
+        array(
+            'X-HTTP-Method-Override' => 'PATCH', 
+            'Content-Type' => 'application/json-patch+json'));
+
+Note that your specific endpoint may not require the `X-HTTP-Method-Override` header, nor understand the [correct](http://tools.ietf.org/html/rfc6902#section-6) `application/json-patch+json` content type. 
+
+`POST JSON` content with correct content type:
+
+    $result = $api->post("http://httpbin.org/post",
+        json_encode(array('foo' => 'bar')),
+        array('Content-Type' => 'application/json'));
+
+
+Not all endpoints support all HTTP verbs
+----------------------------------------
+These are examples of two common workarounds, but are entirely dependent on the endpoint you are accessing. Consult the service's documentation to see if this is required. 
+
+Passing an `X-HTTP-Method-Override` header:
+
+    $result = $api->post("put_resource", array(), array(
+        'X-HTTP-Method-Override' => "PUT"
+    ));
+
+Passing a `_method` parameter: 
+
+    $result = $api->post("put_resource", array(
+        '_method' => "PUT"
+    ));
 
 
 Tests
