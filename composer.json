@@ -1,6 +1,6 @@
 {
     "name": "tcdent/php-restclient", 
-    "version": "0.1.4", 
+    "version": "0.1.5", 
     "description": "A generic REST API client for PHP", 
     "type": "library", 
     "keywords": ["REST", "api", "client", "curl", "JSON", "XML"], 
@@ -17,7 +17,7 @@
         "issues": "http://github.com/tcdent/php-restclient/issues"
     }, 
     "require": {
-        "php": ">=5.2", 
+        "php": ">=5.4.0", 
         "ext-curl": "*", 
         "ext-json": "*"
     }, 

@@ -3,7 +3,7 @@
 /**
  * PHP REST Client
  * https://github.com/tcdent/php-restclient
- * (c) 2013 Travis Dent <tcdent@gmail.com>
+ * (c) 2013-2016 Travis Dent <tcdent@gmail.com>
  */
 
 class RestClientException extends Exception {}
@@ -18,27 +18,27 @@ class RestClient implements Iterator, ArrayAccess {
     public $headers; // Parsed reponse header object.
     public $info; // Response info object.
     public $error; // Response error string.
+    public $response_status_lines; // indexed array of raw HTTP response status lines.
     
     // Populated as-needed.
     public $decoded_response; // Decoded response body. 
-    private $iterator_positon;
     
-    public function __construct($options=array()){
-        $default_options = array(
-            'headers' => array(), 
-            'parameters' => array(), 
-            'curl_options' => array(), 
-            'user_agent' => "PHP RestClient/0.1.4", 
+    public function __construct($options=[]){
+        $default_options = [
+            'headers' => [], 
+            'parameters' => [], 
+            'curl_options' => [], 
+            'user_agent' => "PHP RestClient/0.1.5", 
             'base_url' => NULL, 
             'format' => NULL, 
             'format_regex' => "/(\w+)\/(\w+)(;[.+])?/",
-            'decoders' => array(
+            'decoders' => [
                 'json' => 'json_decode', 
                 'php' => 'unserialize'
-            ), 
+            ], 
             'username' => NULL, 
             'password' => NULL
-        );
+        ];
         
         $this->options = array_merge($default_options, $options);
         if(array_key_exists('decoders', $options))
@@ -104,41 +104,45 @@ class RestClient implements Iterator, ArrayAccess {
     }
     
     // Request methods:
-    public function get($url, $parameters=array(), $headers=array()){
+    public function get($url, $parameters=[], $headers=[]){
         return $this->execute($url, 'GET', $parameters, $headers);
     }
     
-    public function post($url, $parameters=array(), $headers=array()){
+    public function post($url, $parameters=[], $headers=[]){
         return $this->execute($url, 'POST', $parameters, $headers);
     }
     
-    public function put($url, $parameters=array(), $headers=array()){
+    public function put($url, $parameters=[], $headers=[]){
         return $this->execute($url, 'PUT', $parameters, $headers);
     }
     
-    public function delete($url, $parameters=array(), $headers=array()){
+    public function delete($url, $parameters=[], $headers=[]){
         return $this->execute($url, 'DELETE', $parameters, $headers);
     }
     
-    public function execute($url, $method='GET', $parameters=array(), $headers=array()){
+    public function execute($url, $method='GET', $parameters=[], $headers=[]){
         $client = clone $this;
         $client->url = $url;
         $client->handle = curl_init();
-        $curlopt = array(
+        $curlopt = [
             CURLOPT_HEADER => TRUE, 
             CURLOPT_RETURNTRANSFER => TRUE, 
             CURLOPT_USERAGENT => $client->options['user_agent']
-        );
+        ];
         
         if($client->options['username'] && $client->options['password'])
             $curlopt[CURLOPT_USERPWD] = sprintf("%s:%s", 
                 $client->options['username'], $client->options['password']);
         
         if(count($client->options['headers']) || count($headers)){
-            $curlopt[CURLOPT_HTTPHEADER] = array();
+            $curlopt[CURLOPT_HTTPHEADER] = [];
             $headers = array_merge($client->options['headers'], $headers);
-            foreach($headers as $key => $value){
-                $curlopt[CURLOPT_HTTPHEADER][] = sprintf("%s:%s", $key, $value);
+            foreach($headers as $key => $values){
+                if(!is_array($values))
+                    $values = [$values];
+                foreach($values as $value){
+                    $curlopt[CURLOPT_HTTPHEADER][] = sprintf("%s:%s", $key, $value);
+                }
             }
         }
         
@@ -193,30 +197,41 @@ class RestClient implements Iterator, ArrayAccess {
     
     public function format_query($parameters, $primary='=', $secondary='&'){
         $query = "";
-        foreach($parameters as $key => $value){
-            $pair = array(urlencode($key), urlencode($value));
-            $query .= implode($primary, $pair) . $secondary;
+        foreach($parameters as $key => $values){
+            if(!is_array($values))
+                $values = [$values];
+            foreach($values as $value){
+                $pair = [urlencode($key), urlencode($value)];
+                $query .= implode($primary, $pair) . $secondary;
+            }
         }
         return rtrim($query, $secondary);
     }
     
     public function parse_response($response){
-        $headers = array();
-        $http_ver = strtok($response, "\n");
-        
-        while($line = strtok("\n")){
-            if(strlen(trim($line)) == 0) break;
-            
-            list($key, $value) = explode(':', $line, 2);
-            $key = trim(strtolower(str_replace('-', '_', $key)));
-            $value = trim($value);
-            if(empty($headers[$key]))
-                $headers[$key] = $value;
-            elseif(is_array($headers[$key]))
-                $headers[$key][] = $value;
-            else
-                $headers[$key] = array($headers[$key], $value);
-        }
+        $headers = [];
+        $this->response_status_lines = [];
+        $line = strtok($response, "\n");
+        do {
+            if(strpos($line, 'HTTP') === 0)
+                $this->response_status_lines[] = trim($line);
+            elseif(strlen(trim($line)) == 0){
+                if(count($headers) > 0) break; // move on to response body
+            }
+            else { 
+                // gotta be a header
+                list($key, $value) = explode(':', $line, 2);
+                $key = trim(strtolower(str_replace('-', '_', $key)));
+                $value = trim($value);
+                
+                if(is_array($headers[$key]))
+                    $headers[$key][] = $value;
+                elseif(!empty($headers[$key]))
+                    $headers[$key] = [$headers[$key], $value];
+                else
+                    $headers[$key] = $value;
+            }
+        } while($line = strtok("\n"));
         
         $this->headers = (object) $headers;
         $this->response = strtok("");

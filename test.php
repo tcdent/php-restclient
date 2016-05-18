@@ -35,13 +35,14 @@ class RestClientTest extends PHPUnit_Framework_TestCase {
         global $TEST_SERVER_URL;
         
         $api = new RestClient;
-        $result = $api->get($TEST_SERVER_URL, array(
-            'foo' => ' bar', 'baz' => 1));
+        $result = $api->get($TEST_SERVER_URL, [
+            'foo' => ' bar', 'baz' => 1, 'bat[]' => ['foo', 'bar']
+        ]);
         
         $response_json = $result->decode_response();
         $this->assertEquals('GET', 
             $response_json->SERVER->REQUEST_METHOD);
-        $this->assertEquals("foo=+bar&baz=1", 
+        $this->assertEquals("foo=+bar&baz=1&bat%5B%5D=foo&bat%5B%5D=bar", 
             $response_json->SERVER->QUERY_STRING);
         $this->assertEquals("", 
             $response_json->body);
@@ -51,13 +52,14 @@ class RestClientTest extends PHPUnit_Framework_TestCase {
         global $TEST_SERVER_URL;
         
         $api = new RestClient;
-        $result = $api->post($TEST_SERVER_URL, array(
-            'foo' => ' bar', 'baz' => 1));
+        $result = $api->post($TEST_SERVER_URL, [
+            'foo' => ' bar', 'baz' => 1, 'bat[]' => ['foo', 'bar']
+        ]);
         
         $response_json = $result->decode_response();
         $this->assertEquals('POST', 
             $response_json->SERVER->REQUEST_METHOD);
-        $this->assertEquals("foo=+bar&baz=1", 
+        $this->assertEquals("foo=+bar&baz=1&bat%5B%5D=foo&bat%5B%5D=bar", 
             $response_json->body);
     }
     
@@ -137,6 +139,37 @@ class RestClientTest extends PHPUnit_Framework_TestCase {
             $response_json->SERVER->REQUEST_METHOD);
         $this->assertEquals("{\"foo\":\"bar\"}", 
             $response_json->body);
+    }
+    
+    public function test_multiheader_response(){
+        $RESPONSE = "HTTP/1.1 200 OK\r\nContent-type: text/json\r\nContent-Type: application/json\r\n\r\nbody";
+        
+        $api = new RestClient;
+        // bypass request execution to inject controlled response data.
+        $api->parse_response($RESPONSE);
+        
+        $this->assertEquals(["HTTP/1.1 200 OK"], 
+            $api->response_status_lines);
+        $this->assertEquals((object) [
+            'content_type' => ["text/json", "application/json"]
+        ], $api->headers);
+        $this->assertEquals("body", $api->response);
+    }
+    
+    public function test_multistatus_response(){
+        $RESPONSE = "HTTP/1.1 100 Continue\r\n\r\nHTTP/1.1 200 OK\r\nCache-Control: no-cache\r\nContent-Type: application/json\r\n\r\nbody";
+        
+        $api = new RestClient;
+        // bypass request execution to inject controlled response data.
+        $api->parse_response($RESPONSE);
+        
+        $this->assertEquals(["HTTP/1.1 100 Continue", "HTTP/1.1 200 OK"], 
+            $api->response_status_lines);
+        $this->assertEquals((object) [
+                'cache_control' => "no-cache", 
+                'content_type' => "application/json"
+            ], $api->headers);
+        $this->assertEquals("body", $api->response);
     }
 }
 
