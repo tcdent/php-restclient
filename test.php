@@ -5,8 +5,7 @@
 
 // Test Server
 // This code is only executed by the test server instance. It returns simple 
-// JSON debug information for validating behavior. See the constructor and
-// destructor methods of RestClientServerTest for usage. 
+// JSON debug information for validating behavior. 
 if(php_sapi_name() == 'cli-server'){
     header("Content-Type: application/json");
     die(json_encode(array(

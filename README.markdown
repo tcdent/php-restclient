@@ -9,6 +9,7 @@ Installation
 $ php composer.phar require tcdent/php-restclient
 ```
 
+
 Basic Usage
 -----------
 ``` php
@@ -23,6 +24,7 @@ $result = $api->get("search/tweets", ['q' => "#php"]);
 if($result->info->http_code == 200)
     var_dump($result->decode_response());
 ```
+
 
 Configurable Options
 --------------------
@@ -40,12 +42,11 @@ Configurable Options
 Options can be set upon instantiation, or individually afterword:
 
 ``` php
-$api = new RestClient([
+$api = new RestClient(array(
     'format' => "json", 
     'user_agent' => "my-application/0.1"
-]);
+));
 ```
-
 -or-
 
 ``` php
@@ -75,7 +76,7 @@ You can make a request using any verb by calling `execute()` directly, which acc
 
 Response Details
 ----------------
-After making a request with one of the HTTP verb methods, or `execute`, the returned instance will have the folowing data populated:
+After making a request with one of the HTTP verb methods, or `execute`, the returned instance will have the following data populated:
 
 `response` `(string)`- The raw response body content. See ["Direct Iteration and Response Decoding"](#direct-iteration-and-response-decoding) for ways to parse and access this data.
 
@@ -95,7 +96,7 @@ $response->headers->x_powered_by;
 
 `error` `(string)` - cURL error message, if applicable.
 
-`response_status_lines` - Indexed array of raw HTTP response status lines. See: ["Multiple HTTP Status Lines"](#multiple-http-status-lines).
+`response_status_lines` `(array)` - Indexed array of raw HTTP response status lines. See: ["Multiple HTTP Status Lines"](#multiple-http-status-lines).
 
 
 Direct Iteration and Response Decoding
@@ -179,7 +180,7 @@ if(is_array($result->headers->content_type))
 => "text/html"
 ```
 
-Passing repeated headers and parameters:
+Passing repeated headers and parameters in a request:
 
 ``` php
 $result = $api->get('/', [
