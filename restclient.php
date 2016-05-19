@@ -138,9 +138,7 @@ class RestClient implements Iterator, ArrayAccess {
             $curlopt[CURLOPT_HTTPHEADER] = [];
             $headers = array_merge($client->options['headers'], $headers);
             foreach($headers as $key => $values){
-                if(!is_array($values))
-                    $values = [$values];
-                foreach($values as $value){
+                foreach(is_array($values)? $values : [$values] as $value){
                     $curlopt[CURLOPT_HTTPHEADER][] = sprintf("%s:%s", $key, $value);
                 }
             }
@@ -198,9 +196,7 @@ class RestClient implements Iterator, ArrayAccess {
     public function format_query($parameters, $primary='=', $secondary='&'){
         $query = "";
         foreach($parameters as $key => $values){
-            if(!is_array($values))
-                $values = [$values];
-            foreach($values as $value){
+            foreach(is_array($values)? $values : [$values] as $value){
                 $pair = [urlencode($key), urlencode($value)];
                 $query .= implode($primary, $pair) . $secondary;
             }
@@ -213,13 +209,16 @@ class RestClient implements Iterator, ArrayAccess {
         $this->response_status_lines = [];
         $line = strtok($response, "\n");
         do {
-            if(strpos($line, 'HTTP') === 0)
+            if(strpos($line, 'HTTP') === 0){
+                // One or more HTTP status lines
                 $this->response_status_lines[] = trim($line);
+            }
             elseif(strlen(trim($line)) == 0){
-                if(count($headers) > 0) break; // move on to response body
+                // Since we tokenize on \n, use the remaining \r to detect empty lines.
+                if(count($headers) > 0) break; // Must be the newline after headers, move on to response body
             }
             else { 
-                // gotta be a header
+                // Has to be a header
                 list($key, $value) = explode(':', $line, 2);
                 $key = trim(strtolower(str_replace('-', '_', $key)));
                 $value = trim($value);
