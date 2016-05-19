@@ -29,15 +29,15 @@ if($result->info->http_code == 200)
 Configurable Options
 --------------------
 `headers` - An associative array of HTTP headers and values to be included in every request.  
-`parameters` - An associative array of parameters to be merged with individual request parameters in every request.  
-`curl_options` - cURL options to apply to every request. These will override any automatically generated values.  
-`user_agent` - User agent string.  
+`parameters` - An associative array of URL or body parameters to be included in every request.  
+`curl_options` - cURL options to apply to every request; anything defined here: https://secure.php.net/manual/en/function.curl-setopt.php. These will override any automatically generated values.  
+`user_agent` - User agent string to use in requests.  
 `base_url` - URL to use for the base of each request.  
-`format` - Format to append to resource and support decoding.  
-`format_regex` - Pattern to extract format from response Content-Type header.  
-`decoders` - Associative array of format decoders, see documentation below.  
-`username` - Username to use for basic authentication. Requires `password`.  
-`password` - Password to use for basic authentication. Requires `username`.  
+`format` - Format string is appended to resource on request (extension), and used to determine which decoder to use on response; a request URL like "api.twitter.com/1.1/statuses/user_timeline.json" would be expected to return well-formed JSON.  
+`format_regex` - Pattern to extract format from response Content-Type header, used to determine which decoder to use on response.  
+`decoders` - Associative array of format decoders. See ["Direct Iteration and Response Decoding"](#direct-iteration-and-response-decoding).  
+`username` - Username to use for HTTP basic authentication. Requires `password`.  
+`password` - Password to use for HTTP basic authentication. Requires `username`.  
 
 Options can be set upon instantiation, or individually afterword:
 
