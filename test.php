@@ -170,6 +170,19 @@ class RestClientTest extends PHPUnit_Framework_TestCase {
             ], $api->headers);
         $this->assertEquals("body", $api->response);
     }
+    
+    public function test_status_only_response(){
+        $RESPONSE = "HTTP/1.1 100 Continue\r\n\r\n";
+        
+        $api = new RestClient;
+        // bypass request execution to inject controlled response data.
+        $api->parse_response($RESPONSE);
+        
+        $this->assertEquals(["HTTP/1.1 100 Continue"], 
+            $api->response_status_lines);
+        $this->assertEquals((object) [], $api->headers);
+        $this->assertEquals("", $api->response);
+    }
 }
 
 
