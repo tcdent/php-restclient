@@ -42,10 +42,10 @@ Configurable Options
 Options can be set upon instantiation, or individually afterword:
 
 ``` php
-$api = new RestClient(array(
+$api = new RestClient([
     'format' => "json", 
     'user_agent' => "my-application/0.1"
-));
+]);
 ```
 -or-
 
