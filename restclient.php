@@ -209,13 +209,13 @@ class RestClient implements Iterator, ArrayAccess {
         $this->response_status_lines = [];
         $line = strtok($response, "\n");
         do {
-            if(strpos($line, 'HTTP') === 0){
-                // One or more HTTP status lines
-                $this->response_status_lines[] = trim($line);
-            }
-            elseif(strlen(trim($line)) == 0){
+            if(strlen(trim($line)) == 0){
                 // Since we tokenize on \n, use the remaining \r to detect empty lines.
                 if(count($headers) > 0) break; // Must be the newline after headers, move on to response body
+            }
+            elseif(strpos($line, 'HTTP') === 0){
+                // One or more HTTP status lines
+                $this->response_status_lines[] = trim($line);
             }
             else { 
                 // Has to be a header
@@ -223,12 +223,12 @@ class RestClient implements Iterator, ArrayAccess {
                 $key = trim(strtolower(str_replace('-', '_', $key)));
                 $value = trim($value);
                 
-                if(is_array($headers[$key]))
-                    $headers[$key][] = $value;
-                elseif(!empty($headers[$key]))
-                    $headers[$key] = [$headers[$key], $value];
-                else
+                if(empty($headers[$key]))
                     $headers[$key] = $value;
+                elseif(is_array($headers[$key]))
+                    $headers[$key][] = $value;
+                else
+                    $headers[$key] = [$headers[$key], $value];
             }
         } while($line = strtok("\n"));
         
