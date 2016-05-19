@@ -174,10 +174,9 @@ Accessing repeated headers in the response instance:
 
 ``` php
 $result = $api->get('/');
-if(is_array($result->headers->content_type))
-    var_dump($result->headers->content_type[0]);
+var_dump($result->headers->content_type);
 
-=> "text/html"
+=> ["text/html", "text/html; charset=UTF-8"]
 ```
 
 Passing repeated headers and parameters in a request:
