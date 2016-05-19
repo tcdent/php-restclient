@@ -5,23 +5,24 @@ https://github.com/tcdent/php-restclient
 
 Installation
 -----------
-
-    $ php composer.phar require tcdent/php-restclient
+``` sh
+$ php composer.phar require tcdent/php-restclient
+```
 
 Basic Usage
 -----------
-
-    $api = new RestClient([
-        'base_url' => "https://api.twitter.com/1.1", 
-        'format' => "json", 
-         // https://dev.twitter.com/docs/auth/application-only-auth
-        'headers' => ['Authorization' => 'Bearer '.OAUTH_BEARER], 
-    ]);
-    $result = $api->get("search/tweets", ['q' => "#php"]);
-    // GET http://api.twitter.com/1.1/search/tweets.json?q=%23php
-    if($result->info->http_code == 200)
-        var_dump($result->decode_response());
-
+``` php
+$api = new RestClient([
+    'base_url' => "https://api.twitter.com/1.1", 
+    'format' => "json", 
+     // https://dev.twitter.com/docs/auth/application-only-auth
+    'headers' => ['Authorization' => 'Bearer '.OAUTH_BEARER], 
+]);
+$result = $api->get("search/tweets", ['q' => "#php"]);
+// GET http://api.twitter.com/1.1/search/tweets.json?q=%23php
+if($result->info->http_code == 200)
+    var_dump($result->decode_response());
+```
 
 Configurable Options
 --------------------
@@ -38,17 +39,20 @@ Configurable Options
 
 Options can be set upon instantiation, or individually afterword:
 
-    $api = new RestClient([
-        'format' => "json", 
-        'user_agent' => "my-application/0.1"
-    ]);
+``` php
+$api = new RestClient([
+    'format' => "json", 
+    'user_agent' => "my-application/0.1"
+]);
+```
 
 -or-
 
-    $api = new RestClient;
-    $api->set_option('format', "json");
-    $api->set_option('user_agent', "my-application/0.1");
-
+``` php
+$api = new RestClient;
+$api->set_option('format', "json");
+$api->set_option('user_agent', "my-application/0.1");
+```
 
 Verbs
 -----
@@ -82,17 +86,21 @@ option is set, it will be used to select the decoder. If no `format` option
 is provided, an attempt is made to extract it from the response `Content-Type` 
 header. This pattern is configurable with the `format_regex` option.
 
-    $api = new RestClient([
-        'base_url' => "http://vimeo.com/api/v2", 
-        'format' => "php"
-    ]);
-    $result = $api->get("tcdent/info");
-    foreach($result as $key => $value)
-        var_dump($value);
+``` php
+$api = new RestClient([
+    'base_url' => "http://vimeo.com/api/v2", 
+    'format' => "php"
+]);
+$result = $api->get("tcdent/info");
+foreach($result as $key => $value)
+    var_dump($value);
+```
 
 Reading via ArrayAccess has been implemented, too:
 
-    var_dump($result['id']);
+``` php
+var_dump($result['id']);
+```
 
 To access the decoded response as an array, call `decode_response()`.
 
@@ -101,26 +109,32 @@ and `unserialize` functions, respectively. Overrides and additional
 decoders can be specified upon instantiation, or individually afterword. 
 Decoder functions take one argument: the raw request body. Lambdas and functions created with `create_function` work, too. 
 
-    function my_xml_decoder($data){
-        new SimpleXMLElement($data);
-    }
+``` php
+function my_xml_decoder($data){
+    new SimpleXMLElement($data);
+}
 
-    $api = new RestClient([
-        'format' => "xml", 
-        'decoders' => ['xml' => "my_xml_decoder"]
-    ]);
+$api = new RestClient([
+    'format' => "xml", 
+    'decoders' => ['xml' => "my_xml_decoder"]
+]);
+```
 
 -or-
 
-    $api = new RestClient;
-    $api->set_option('format', "xml");
-    $api->register_decoder('xml', "my_xml_decoder");
+``` php
+$api = new RestClient;
+$api->set_option('format', "xml");
+$api->register_decoder('xml', "my_xml_decoder");
+```
 
 Or, using a lambda; this particular example allows you to receive decoded JSON data as an array.
 
-    $api->register_decoder('json', function($data){
-        return json_decode($data, TRUE);
-    });
+``` php
+$api->register_decoder('json', function($data){
+    return json_decode($data, TRUE);
+});
+```
 
 
 Duplicate Headers and Parameters
@@ -129,31 +143,39 @@ When duplicate (repeated) HTTP headers are received, they are accessible via an 
 
 Example (unlikely) response:
 
-    HTTP/1.1 200 OK
-    Content-Type: text/html
-    Content-Type: text/html; charset=UTF-8
+```
+HTTP/1.1 200 OK
+Content-Type: text/html
+Content-Type: text/html; charset=UTF-8
+```
 
 Accessing repeated headers in the response instance:
 
-    $result = $api->get('/');
-    if(is_array($result->headers->content_type))
-        var_dump($result->headers->content_type[0]);
-    
-    => "text/html"
+``` php
+$result = $api->get('/');
+if(is_array($result->headers->content_type))
+    var_dump($result->headers->content_type[0]);
+
+=> "text/html"
+```
 
 Passing repeated headers and parameters:
 
-    $result = $api->get('/', [
-        'foo[]' => ['bar', 'baz']
-    ], [
-        'Accept' => ['text/json', 'application/json']
-    ]);
+``` php
+$result = $api->get('/', [
+    'foo[]' => ['bar', 'baz']
+], [
+    'Accept' => ['text/json', 'application/json']
+]);
+```
 
 Will create a query string (GET) or response body (POST, etc) with the following content:
 
-    GET /?foo[]=bar&foo[]=baz HTTP/1.1
-    Accept: text/json
-    Accept: application/json
+```
+GET /?foo[]=bar&foo[]=baz HTTP/1.1
+Accept: text/json
+Accept: application/json
+```
 
 
 Multiple HTTP Status Lines
@@ -162,16 +184,20 @@ Multiple status lines returned in a single response payload are supported, and a
 
 Example response (truncated):
 
-    HTTP/1.1 100 Continue
-    
-    HTTP/1.1 200 OK
-    Cache-Control: no-cache
-    ...
+``` 
+HTTP/1.1 100 Continue
 
-    $result = $api->get('/');
-    var_dump($result->response_status_lines);
-    
-    => ["HTTP/1.1 100 Continue", "HTTP/1.1 200 OK"]
+HTTP/1.1 200 OK
+Cache-Control: no-cache
+...
+```
+
+``` php
+$result = $api->get('/');
+var_dump($result->response_status_lines);
+
+=> ["HTTP/1.1 100 Continue", "HTTP/1.1 200 OK"]
+```
 
 
 JSON Verbs
@@ -180,18 +206,22 @@ This library will never validate or construct `PATCH JSON` content, but it can b
 
 `PATCH JSON` content with correct content type:
 
-    $result = $api->execute("http://httpbin.org/patch", 'PATCH',
-        json_encode([foo' => 'bar']), [
-            'X-HTTP-Method-Override' => 'PATCH', 
-            'Content-Type' => 'application/json-patch+json']);
+``` php
+$result = $api->execute("http://httpbin.org/patch", 'PATCH',
+    json_encode([foo' => 'bar']), [
+        'X-HTTP-Method-Override' => 'PATCH', 
+        'Content-Type' => 'application/json-patch+json']);
+```
 
 Note that your specific endpoint may not require the `X-HTTP-Method-Override` header, nor understand the [correct](http://tools.ietf.org/html/rfc6902#section-6) `application/json-patch+json` content type. 
 
 `POST JSON` content with correct content type:
 
-    $result = $api->post("http://httpbin.org/post",
-        json_encode(['foo' => 'bar']),
-        ['Content-Type' => 'application/json']);
+``` php
+$result = $api->post("http://httpbin.org/post",
+    json_encode(['foo' => 'bar']),
+    ['Content-Type' => 'application/json']);
+```
 
 
 Not all endpoints support all HTTP verbs
@@ -200,27 +230,35 @@ These are examples of two common workarounds, but are entirely dependent on the 
 
 Passing an `X-HTTP-Method-Override` header:
 
-    $result = $api->post("/", [], [
-        'X-HTTP-Method-Override' => "PUT"
-    ]);
+``` php
+$result = $api->post("/", [], [
+    'X-HTTP-Method-Override' => "PUT"
+]);
+```
 
 Passing a `_method` parameter: 
 
-    $result = $api->post("/", [
-        '_method' => "PUT"
-    ]);
+``` php
+$result = $api->post("/", [
+    '_method' => "PUT"
+]);
+```
 
 
 Tests
 -----
 The test package includes a simple server script which returns debug information for verifying functionality. Start the server first, then run tests:
 
-    $ php -S localhost:8888 test.php
-    $ phpunit test
+``` sh
+$ php -S localhost:8888 test.php
+$ phpunit test
+```
 
 * Requires PHP > 5.5.7 in order for `getallheaders` data to populate.
 * If you specify an alternate port number or hostname to the PHP server you need to re-configure it in your `phpunit.xml` file:
 
-    ```<php><var name="TEST_SERVER_URL" value="http://localhost:8888"/></php>```
+``` xml
+<php><var name="TEST_SERVER_URL" value="http://localhost:8888"/></php>
+```
 
 
