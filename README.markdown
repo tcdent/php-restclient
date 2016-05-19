@@ -54,28 +54,48 @@ $api->set_option('format', "json");
 $api->set_option('user_agent', "my-application/0.1");
 ```
 
-Verbs
------
+
+Standard Verbs
+--------------
 Four HTTP verbs are implemented as convenience methods: `get()`, `post()`, `put()` and `delete()`. Each accepts three arguments:  
 
-`url` - `string` URL of the resource you are requesting. Will be prepended with the value of the `base_url` option, if it has been configured. Will be appended with the value of the `format` option, if it has been configured.  
+`url` `(string)` - URL of the resource you are requesting. Will be prepended with the value of the `base_url` option, if it has been configured. Will be appended with the value of the `format` option, if it has been configured.  
 
-`parameters` - `string` or associative `array` to be appended to the URL in `GET` requests and passed in the request body on all others. If an array is passed it will be encoded into a query string. Assign a nested, indexed `array` for parameters with multiple values and they will be expanded to populate duplicate keys (See: __Duplicate Headers and Parameters__).
+`parameters` `(string), (array)` - String or associative array to be appended to the URL in `GET` requests and passed in the request body on all others. If an array is passed it will be encoded into a query string. A nested, indexed `array` is passed for parameters with multiple values and will be iterated to populate duplicate keys See: ["Duplicate Headers and Parameters"](#duplicate-headers-and-parameters)
 
-`headers` - An associative `array` of headers to include with the request. 
+`headers` `(array)` - An associative array of headers to include with the request. A nested, indexed `array` is passed for parameters with multiple values and will be iterated to populate duplicate keys See: ["Duplicate Headers and Parameters"](#duplicate-headers-and-parameters)
 
+
+Other Verbs
+-----------
 You can make a request using any verb by calling `execute()` directly, which accepts four arguments: `url`, `method`, `parameters` and `headers`. All arguments expect the same values as in the convenience methods, with the exception of the additional `method` argument:
 
-`method` - `string` HTTP verb to perform the request with. 
+`method` `(string)` - HTTP verb to perform the request with. 
 
 
-Attributes populated after making a request
--------------------------------------------
-`response` - Plain text response body.  
-`headers` - Parsed response header object.  
-`info` - cURL response info object.  
-`error` - Response error string.  
-`response_status_lines` - Indexed array of raw HTTP response status lines. See: __Multiple HTTP Status Lines__.
+Response Details
+----------------
+After making a request with one of the HTTP verb methods, or `execute`, the returned instance will have the folowing data populated:
+
+`response` `(string)`- The raw response body content. See ["Direct Iteration and Response Decoding"](#direct-iteration-and-response-decoding) for ways to parse and access this data.
+
+`headers` `(object)` - An object with all of the response headers populated. Indexes are transformed to `snake_case` for access. Duplicate headers are available as an indexed array under the shared key.
+``` php
+$response->headers->content_type;
+$response->headers->x_powered_by;
+```
+
+`info` `(object)` - An object with information about the transaction. Populated by casting `curl_info` to an object. See PHP documentation for more info: http://php.net/manual/en/function.curl-getinfo.php Available attributes are: 
+
+    url, content_type, http_code, header_size, request_size, filetime, 
+    ssl_verify_result, redirect_count, total_time, namelookup_time, connect_time, 
+    pretransfer_time, size_upload, size_download, speed_download, speed_upload, 
+    download_content_length, upload_content_length, starttransfer_time, redirect_time, 
+    certinfo, primary_ip, primary_port, local_ip, local_port, redirect_url  
+
+`error` `(string)` - cURL error message, if applicable.
+
+`response_status_lines` - Indexed array of raw HTTP response status lines. See: ["Multiple HTTP Status Lines"](#multiple-http-status-lines).
 
 
 Direct Iteration and Response Decoding
@@ -169,7 +189,7 @@ $result = $api->get('/', [
 ]);
 ```
 
-Will create a query string (GET) or response body (POST, etc) with the following content:
+Will create headers and a query string (GET) or response body (POST, etc) with the following content:
 
 ```
 GET /?foo[]=bar&foo[]=baz HTTP/1.1
@@ -180,9 +200,9 @@ Accept: application/json
 
 Multiple HTTP Status Lines
 --------------------------
-Multiple status lines returned in a single response payload are supported, and available as an indexed array on the response instance.
+Multiple status lines returned in a single response payload are supported, and available as `response_status_lines` which is an indexed array populated on the response instance.
 
-Example response (truncated):
+Example response with multiple status lines (truncated):
 
 ``` 
 HTTP/1.1 100 Continue
