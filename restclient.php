@@ -116,6 +116,10 @@ class RestClient implements Iterator, ArrayAccess {
         return $this->execute($url, 'PUT', $parameters, $headers);
     }
     
+    public function patch($url, $parameters=[], $headers=[]){
+        return $this->execute($url, 'PATCH', $parameters, $headers);
+    }
+    
     public function delete($url, $parameters=[], $headers=[]){
         return $this->execute($url, 'DELETE', $parameters, $headers);
     }
