@@ -201,15 +201,8 @@ class RestClient implements Iterator, ArrayAccess {
         return $client;
     }
     
-    public function format_query($parameters, $primary='=', $secondary='&'){
-        $query = "";
-        foreach($parameters as $key => $values){
-            foreach(is_array($values)? $values : [$values] as $value){
-                $pair = [urlencode($key), urlencode($value)];
-                $query .= implode($primary, $pair) . $secondary;
-            }
-        }
-        return rtrim($query, $secondary);
+    public function format_query($parameters){
+        return http_build_query($parameters);
     }
     
     public function parse_response($response){
