@@ -3,7 +3,7 @@
 /**
  * PHP REST Client
  * https://github.com/tcdent/php-restclient
- * (c) 2013-2016 Travis Dent <tcdent@gmail.com>
+ * (c) 2013-2017 Travis Dent <tcdent@gmail.com>
  */
 
 class RestClientException extends Exception {}
@@ -160,7 +160,7 @@ class RestClient implements Iterator, ArrayAccess {
         // merged with parameters specified in the default options.
         if(is_array($parameters)){
             $parameters = array_merge($client->options['parameters'], $parameters);
-            $parameters_string = $client->format_query($parameters);
+            $parameters_string = http_build_query($parameters);
         }
         else
             $parameters_string = (string) $parameters;
@@ -199,17 +199,6 @@ class RestClient implements Iterator, ArrayAccess {
         
         curl_close($client->handle);
         return $client;
-    }
-    
-    public function format_query($parameters, $primary='=', $secondary='&'){
-        $query = "";
-        foreach($parameters as $key => $values){
-            foreach(is_array($values)? $values : [$values] as $value){
-                $pair = [urlencode($key), urlencode($value)];
-                $query .= implode($primary, $pair) . $secondary;
-            }
-        }
-        return rtrim($query, $secondary);
     }
     
     public function parse_response($response){
