@@ -28,7 +28,7 @@ class RestClient implements Iterator, ArrayAccess {
             'headers' => [], 
             'parameters' => [], 
             'curl_options' => [], 
-            'user_agent' => "PHP RestClient/0.1.5", 
+            'user_agent' => "PHP RestClient/0.1.6", 
             'base_url' => NULL, 
             'format' => NULL, 
             'format_regex' => "/(\w+)\/(\w+)(;[.+])?/",
