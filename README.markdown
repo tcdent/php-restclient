@@ -220,6 +220,32 @@ var_dump($result->response_status_lines);
 => ["HTTP/1.1 100 Continue", "HTTP/1.1 200 OK"]
 ```
 
+Multiple Headers
+--------------------------
+If you use cURL options CURLOPT_FOLLOWLOCATION and so, all previous headers are available in history_headers which is an indexed array of headers
+
+``` php
+$result = $api->get('/');
+var_dump($result->history_headers);
+```
+
+Raw Response
+--------------------------
+You can see the raw response for debugging for example
+
+``` php
+$result = $api->get('/');
+var_dump($result->rawresponse);
+```
+
+cURL options
+--------------------------
+Always for debugging reasons, you can see all cURL options
+
+``` php
+$result = $api->get('/');
+var_dump($result->curloptions);
+```
 
 JSON Verbs
 ----------
@@ -236,10 +262,10 @@ $result = $api->execute("http://httpbin.org/patch", 'PATCH',
 
 Tests
 -----
-The test package includes a simple server script which returns debug information for verifying functionality. Start the server first, then run tests:
+The test package includes a simple server script which returns debug information for verifying functionality. Start the server first in the project root directory, then run tests:
 
 ``` sh
-$ php -S localhost:8888 test.php
+$ php -S localhost:8888
 $ phpunit test
 ```
 
