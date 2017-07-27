@@ -10,6 +10,7 @@ class RestClientException extends Exception {}
 
 class RestClient implements Iterator, ArrayAccess {
     
+    public $url;
     public $options;
     public $handle; // cURL resource handle.
     
