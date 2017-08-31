@@ -11,7 +11,7 @@ class RestClientException extends Exception {}
 class RestClient implements Iterator, ArrayAccess {
     
     public $url;
-    public $options;
+	public $options;
     public $handle; // cURL resource handle.
     
     // Populated after execution:
@@ -109,8 +109,8 @@ class RestClient implements Iterator, ArrayAccess {
         return $this->execute($url, 'GET', $parameters, $headers);
     }
     
-    public function post($url, $parameters=[], $headers=[]){
-        return $this->execute($url, 'POST', $parameters, $headers);
+    public function post($url, $parameters=[], $body="", $headers=[]) {
+        return $this->execute($url, 'POST', $parameters, $body, $headers);
     }
     
     public function put($url, $parameters=[], $headers=[]){
@@ -129,7 +129,7 @@ class RestClient implements Iterator, ArrayAccess {
         return $this->execute($url, 'HEAD', $parameters, $headers);
     }
     
-    public function execute($url, $method='GET', $parameters=[], $headers=[]){
+    public function execute($url, $method='GET', $parameters=[], $body, $headers=[]){
         $client = clone $this;
         $client->url = $url;
         $client->handle = curl_init();
@@ -159,16 +159,21 @@ class RestClient implements Iterator, ArrayAccess {
         // Allow passing parameters as a pre-encoded string (or something that
         // allows casting to a string). Parameters passed as strings will not be
         // merged with parameters specified in the default options.
-        if(is_array($parameters)){
+		if(is_array($parameters)){
             $parameters = array_merge($client->options['parameters'], $parameters);
             $parameters_string = http_build_query($parameters);
         }
         else
+		{
             $parameters_string = (string) $parameters;
-        
+        }
+		
         if(strtoupper($method) == 'POST'){
+			$client->url = $client->url.="?".$parameters_string;
+			$curlopt[CURLOPT_CUSTOMREQUEST] = strtoupper($method);
             $curlopt[CURLOPT_POST] = TRUE;
-            $curlopt[CURLOPT_POSTFIELDS] = $parameters_string;
+			$curlopt[CURLOPT_POSTFIELDS] = $body;
+			$curlopt[CURLOPT_RETURNTRANSFER] = TRUE;
         }
         elseif(strtoupper($method) != 'GET'){
             $curlopt[CURLOPT_CUSTOMREQUEST] = strtoupper($method);
@@ -184,8 +189,9 @@ class RestClient implements Iterator, ArrayAccess {
                 $client->url = '/' . $client->url;
             $client->url = $client->options['base_url'] . $client->url;
         }
+		
         $curlopt[CURLOPT_URL] = $client->url;
-        
+		
         if($client->options['curl_options']){
             // array_merge would reset our numeric keys.
             foreach($client->options['curl_options'] as $key => $value){
