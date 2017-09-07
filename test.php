@@ -35,7 +35,7 @@ class RestClientTest extends PHPUnit_Framework_TestCase {
         
         $api = new RestClient;
         $result = $api->get($TEST_SERVER_URL, [
-            'foo' => ' bar', 'baz' => 1, 'bat[]' => ['foo', 'bar']
+            'foo' => ' bar', 'baz' => 1, 'bat' => ['foo', 'bar']
         ]);
         
         $response_json = $result->decode_response();
@@ -52,7 +52,7 @@ class RestClientTest extends PHPUnit_Framework_TestCase {
         
         $api = new RestClient;
         $result = $api->post($TEST_SERVER_URL, [
-            'foo' => ' bar', 'baz' => 1, 'bat[]' => ['foo', 'bar']
+            'foo' => ' bar', 'baz' => 1, 'bat' => ['foo', 'bar']
         ]);
         
         $response_json = $result->decode_response();
@@ -182,6 +182,32 @@ class RestClientTest extends PHPUnit_Framework_TestCase {
             $api->response_status_lines);
         $this->assertEquals((object) [], $api->headers);
         $this->assertEquals("", $api->response);
+    }
+    
+    public function test_build_indexed_queries(){
+        global $TEST_SERVER_URL;
+        
+        $api = new RestClient(['build_indexed_queries' => TRUE]);
+        $result = $api->get($TEST_SERVER_URL, [
+            'foo' => ' bar', 'baz' => 1, 'bat' => ['foo', 'bar', 'baz[12]']
+        ]);
+        
+        $response_json = $result->decode_response();
+        $this->assertEquals("foo=+bar&baz=1&bat%5B0%5D=foo&bat%5B1%5D=bar&bat%5B2%5D=baz%5B12%5D", 
+            $response_json->SERVER->QUERY_STRING);
+    }
+    
+    public function test_build_non_indexed_queries(){
+        global $TEST_SERVER_URL;
+        
+        $api = new RestClient;
+        $result = $api->get($TEST_SERVER_URL, [
+            'foo' => ' bar', 'baz' => 1, 'bat' => ['foo', 'bar', 'baz[12]']
+        ]);
+        
+        $response_json = $result->decode_response();
+        $this->assertEquals("foo=+bar&baz=1&bat%5B%5D=foo&bat%5B%5D=bar&bat%5B%5D=baz%5B12%5D", 
+            $response_json->SERVER->QUERY_STRING);
     }
 }
 

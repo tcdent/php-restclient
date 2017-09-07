@@ -10,7 +10,6 @@ class RestClientException extends Exception {}
 
 class RestClient implements Iterator, ArrayAccess {
     
-    public $url;
     public $options;
     public $handle; // cURL resource handle.
     
@@ -29,7 +28,8 @@ class RestClient implements Iterator, ArrayAccess {
             'headers' => [], 
             'parameters' => [], 
             'curl_options' => [], 
-            'user_agent' => "PHP RestClient/0.1.6", 
+            'build_indexed_queries' => FALSE, 
+            'user_agent' => "PHP RestClient/0.1.7", 
             'base_url' => NULL, 
             'format' => NULL, 
             'format_regex' => "/(\w+)\/(\w+)(;[.+])?/",
@@ -162,6 +162,13 @@ class RestClient implements Iterator, ArrayAccess {
         if(is_array($parameters)){
             $parameters = array_merge($client->options['parameters'], $parameters);
             $parameters_string = http_build_query($parameters);
+            
+            // http_build_query automatically adds an array index to repeated
+            // parameters which is not desirable on most systems. This hack
+            // reverts "key[0]=foo&key[1]=bar" to "key[]=foo&key[]=bar"
+            if(!$client->options['build_indexed_queries'])
+                $parameters_string = preg_replace(
+                    "/%5B[0-9]+%5D=/simU", "%5B%5D=", $parameters_string);
         }
         else
             $parameters_string = (string) $parameters;

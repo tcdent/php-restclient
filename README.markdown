@@ -31,6 +31,7 @@ Configurable Options
 `headers` - An associative array of HTTP headers and values to be included in every request.  
 `parameters` - An associative array of URL or body parameters to be included in every request.  
 `curl_options` - cURL options to apply to every request; anything defined here: https://secure.php.net/manual/en/function.curl-setopt.php. These will override any automatically generated values.  
+`build_indexed_queries` `(bool)` - `http_build_query` automatically adds an array index to repeated parameters which is not desirable on most systems. Use this option to enable the default behavior. Defaults to `FALSE`.
 `user_agent` - User agent string to use in requests.  
 `base_url` - URL to use for the base of each request.  
 `format` - Format string is appended to resource on request (extension), and used to determine which decoder to use on response; a request URL like "api.twitter.com/1.1/statuses/user_timeline.json" would be expected to return well-formed JSON.  
