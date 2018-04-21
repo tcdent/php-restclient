@@ -154,7 +154,7 @@ class RestClient implements Iterator, ArrayAccess {
         }
         
         if($client->options['format'])
-            $client->url .= '.'.$client->options['format'];
+            //$client->url .= '.'.$client->options['format'];
         
         // Allow passing parameters as a pre-encoded string (or something that
         // allows casting to a string). Parameters passed as strings will not be
