@@ -177,6 +177,9 @@ class RestClient implements Iterator, ArrayAccess {
             $curlopt[CURLOPT_POST] = TRUE;
             $curlopt[CURLOPT_POSTFIELDS] = $parameters_string;
         }
+        else if(strtoupper($method) == 'HEAD'){
+            $curlopt[CURLOPT_NOBODY] = TRUE;
+        }
         elseif(strtoupper($method) != 'GET'){
             $curlopt[CURLOPT_CUSTOMREQUEST] = strtoupper($method);
             $curlopt[CURLOPT_POSTFIELDS] = $parameters_string;
