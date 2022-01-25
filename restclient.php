@@ -6,6 +6,50 @@
  * (c) 2013-2017 Travis Dent <tcdent@gmail.com>
  */
 
+/**
+ * @property string $url
+ * @property string $content_type
+ * @property int $http_code
+ * @property int $header_size
+ * @property int $request_size
+ * @property int $filetime
+ * @property int $ssl_verify_result
+ * @property int $redirect_count
+ * @property float $total_time
+ * @property float $namelookup_time
+ * @property float $connect_time
+ * @property float $pretransfer_time
+ * @property float $size_upload
+ * @property float $size_download
+ * @property float $speed_download
+ * @property float $speed_upload
+ * @property float $download_content_length
+ * @property float $upload_content_length
+ * @property float $starttransfer_time
+ * @property float $redirect_time
+ * @property string $redirect_url
+ * @property array $certinfo
+ * @property int $primary_port
+ * @property string $local_ip
+ * @property int $local_port
+ * @property int $http_version
+ * @property int $protocol
+ * @property int $ssl_verifyresult
+ * @property string $scheme
+ * @property int $appconnect_time_us
+ * @property int $connect_time_us
+ * @property int $namelookup_time_us
+ * @property int $pretransfer_time_us
+ * @property int $redirect_time_us
+ * @property int $starttransfer_time_us
+ * @property int $total_time_us
+ */
+class Info extends stdClass {
+    private $data = [];
+    public function __set($name, $value){$this->data[$name] = $value;}
+    public function __get($name){return $this->data[$name];}
+}
+
 class RestClientException extends Exception {}
 
 class RestClient implements Iterator, ArrayAccess {
@@ -16,6 +60,7 @@ class RestClient implements Iterator, ArrayAccess {
     // Populated after execution:
     public $response; // Response body.
     public $headers; // Parsed reponse header object.
+    /** @var Info*/
     public $info; // Response info object.
     public $error; // Response error string.
     public $response_status_lines; // indexed array of raw HTTP response status lines.
@@ -202,11 +247,23 @@ class RestClient implements Iterator, ArrayAccess {
         curl_setopt_array($client->handle, $curlopt);
         
         $client->parse_response(curl_exec($client->handle));
-        $client->info = (object) curl_getinfo($client->handle);
+        $client->info = $this->wrapInfo(curl_getinfo($client->handle));
         $client->error = curl_error($client->handle);
         
         curl_close($client->handle);
         return $client;
+    }
+    
+    private function wrapInfo($info) {
+        $res = new Info();
+        
+        if (!$info || !is_array($info)) return $res;
+        
+        foreach ($info as $key => $value) {
+            $res->$key = $value;
+        }
+        
+        return $res;
     }
     
     public function parse_response($response){
