@@ -17,7 +17,7 @@
         "issues": "http://github.com/tcdent/php-restclient/issues"
     }, 
     "require": {
-        "php": ">=8.0", 
+        "php": ">=7.2", 
         "ext-curl": "*", 
         "ext-json": "*"
     }, 

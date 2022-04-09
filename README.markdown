@@ -5,7 +5,7 @@ https://github.com/tcdent/php-restclient
 
 Installation
 -----------
-Requires PHP 8.0 or above. Use [0.1.7](https://github.com/tcdent/php-restclient/releases/tag/0.1.7) for legacy versions of PHP. 
+Requires PHP 7.2 or above. Use [0.1.7](https://github.com/tcdent/php-restclient/releases/tag/0.1.7) for legacy versions of PHP. 
 
 ``` sh
 $ composer require tcdent/php-restclient

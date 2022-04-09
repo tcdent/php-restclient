@@ -105,31 +105,31 @@ class RestClient implements Iterator, ArrayAccess {
     }
     
     // Request methods:
-    public function get(string $url, array|string $parameters=[], array $headers=[]) : RestClient {
+    public function get(string $url, $parameters=[], array $headers=[]) : RestClient {
         return $this->execute($url, 'GET', $parameters, $headers);
     }
     
-    public function post(string $url, array|string $parameters=[], array $headers=[]) : RestClient {
+    public function post(string $url, $parameters=[], array $headers=[]) : RestClient {
         return $this->execute($url, 'POST', $parameters, $headers);
     }
     
-    public function put(string $url, array|string $parameters=[], array $headers=[]) : RestClient {
+    public function put(string $url, $parameters=[], array $headers=[]) : RestClient {
         return $this->execute($url, 'PUT', $parameters, $headers);
     }
     
-    public function patch(string $url, array|string $parameters=[], array $headers=[]) : RestClient {
+    public function patch(string $url, $parameters=[], array $headers=[]) : RestClient {
         return $this->execute($url, 'PATCH', $parameters, $headers);
     }
     
-    public function delete(string $url, array|string $parameters=[], array $headers=[]) : RestClient {
+    public function delete(string $url, $parameters=[], array $headers=[]) : RestClient {
         return $this->execute($url, 'DELETE', $parameters, $headers);
     }
     
-    public function head(string $url, array|string $parameters=[], array $headers=[]) : RestClient {
+    public function head(string $url, $parameters=[], array $headers=[]) : RestClient {
         return $this->execute($url, 'HEAD', $parameters, $headers);
     }
     
-    public function execute(string $url, string $method='GET', array|string $parameters=[], array $headers=[]) : RestClient {
+    public function execute(string $url, string $method='GET', $parameters=[], array $headers=[]) : RestClient {
         $client = clone $this;
         $client->url = $url;
         $client->handle = curl_init();
@@ -187,7 +187,7 @@ class RestClient implements Iterator, ArrayAccess {
         }
         
         if($client->options['base_url']){
-            if($client->url[0] !== '/' && !str_ends_with($client->options['base_url'], '/'))
+            if($client->url[0] !== '/' && substr($client->options['base_url'], -1) !== '/')
                 $client->url = '/' . $client->url;
             $client->url = $client->options['base_url'] . $client->url;
         }
@@ -218,7 +218,7 @@ class RestClient implements Iterator, ArrayAccess {
                 // Since we tokenize on \n, use the remaining \r to detect empty lines.
                 if(count($headers) > 0) break; // Must be the newline after headers, move on to response body
             }
-            elseif(str_starts_with($line, 'HTTP')){
+            elseif(strpos($line, 'HTTP') === 0){
                 // One or more HTTP status lines
                 $this->response_status_lines[] = trim($line);
             }
@@ -259,7 +259,7 @@ class RestClient implements Iterator, ArrayAccess {
             "Response format could not be determined.");
     }
     
-    public function decode_response() : mixed {
+    public function decode_response(){
         if(empty($this->decoded_response)){
             $format = $this->get_response_format();
             if(!array_key_exists($format, $this->options['decoders']))
