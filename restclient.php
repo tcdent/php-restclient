@@ -1,9 +1,9 @@
-<?php
+<?php declare(strict_types=1);
 
 /**
  * PHP REST Client
  * https://github.com/tcdent/php-restclient
- * (c) 2013-2017 Travis Dent <tcdent@gmail.com>
+ * (c) 2013-2022 Travis Dent <tcdent@gmail.com>
  */
 
 class RestClientException extends Exception {}
@@ -23,13 +23,13 @@ class RestClient implements Iterator, ArrayAccess {
     // Populated as-needed.
     public $decoded_response; // Decoded response body. 
     
-    public function __construct($options=[]){
+    public function __construct(array $options=[]){
         $default_options = [
             'headers' => [], 
             'parameters' => [], 
             'curl_options' => [], 
             'build_indexed_queries' => FALSE, 
-            'user_agent' => "PHP RestClient/0.1.7", 
+            'user_agent' => "PHP RestClient/0.1.8", 
             'base_url' => NULL, 
             'format' => NULL, 
             'format_regex' => "/(\w+)\/(\w+)(;[.+])?/",
@@ -47,47 +47,47 @@ class RestClient implements Iterator, ArrayAccess {
                 $default_options['decoders'], $options['decoders']);
     }
     
-    public function set_option($key, $value){
+    public function set_option($key, $value) : void {
         $this->options[$key] = $value;
     }
     
-    public function register_decoder($format, $method){
+    public function register_decoder(string $format, callable $method) : void {
         // Decoder callbacks must adhere to the following pattern:
         //   array my_decoder(string $data)
         $this->options['decoders'][$format] = $method;
     }
     
     // Iterable methods:
-    public function rewind(){
+    public function rewind() : void {
         $this->decode_response();
-        return reset($this->decoded_response);
+        reset($this->decoded_response);
     }
     
-    public function current(){
+    public function current() : mixed {
         return current($this->decoded_response);
     }
     
-    public function key(){
+    public function key() : mixed {
         return key($this->decoded_response);
     }
     
-    public function next(){
-        return next($this->decoded_response);
+    public function next() : void {
+        next($this->decoded_response);
     }
     
-    public function valid(){
+    public function valid() : bool {
         return is_array($this->decoded_response)
             && (key($this->decoded_response) !== NULL);
     }
     
     // ArrayAccess methods:
-    public function offsetExists($key){
+    public function offsetExists($key) : bool {
         $this->decode_response();
         return is_array($this->decoded_response)?
             isset($this->decoded_response[$key]) : isset($this->decoded_response->{$key});
     }
     
-    public function offsetGet($key){
+    public function offsetGet($key) : mixed {
         $this->decode_response();
         if(!$this->offsetExists($key))
             return NULL;
@@ -96,40 +96,40 @@ class RestClient implements Iterator, ArrayAccess {
             $this->decoded_response[$key] : $this->decoded_response->{$key};
     }
     
-    public function offsetSet($key, $value){
+    public function offsetSet($key, $value) : void {
         throw new RestClientException("Decoded response data is immutable.");
     }
     
-    public function offsetUnset($key){
+    public function offsetUnset($key) : void {
         throw new RestClientException("Decoded response data is immutable.");
     }
     
     // Request methods:
-    public function get($url, $parameters=[], $headers=[]){
+    public function get(string $url, array|string $parameters=[], array $headers=[]) : RestClient {
         return $this->execute($url, 'GET', $parameters, $headers);
     }
     
-    public function post($url, $parameters=[], $headers=[]){
+    public function post(string $url, array|string $parameters=[], array $headers=[]) : RestClient {
         return $this->execute($url, 'POST', $parameters, $headers);
     }
     
-    public function put($url, $parameters=[], $headers=[]){
+    public function put(string $url, array|string $parameters=[], array $headers=[]) : RestClient {
         return $this->execute($url, 'PUT', $parameters, $headers);
     }
     
-    public function patch($url, $parameters=[], $headers=[]){
+    public function patch(string $url, array|string $parameters=[], array $headers=[]) : RestClient {
         return $this->execute($url, 'PATCH', $parameters, $headers);
     }
     
-    public function delete($url, $parameters=[], $headers=[]){
+    public function delete(string $url, array|string $parameters=[], array $headers=[]) : RestClient {
         return $this->execute($url, 'DELETE', $parameters, $headers);
     }
     
-    public function head($url, $parameters=[], $headers=[]){
+    public function head(string $url, array|string $parameters=[], array $headers=[]) : RestClient {
         return $this->execute($url, 'HEAD', $parameters, $headers);
     }
     
-    public function execute($url, $method='GET', $parameters=[], $headers=[]){
+    public function execute(string $url, string $method='GET', array|string $parameters=[], array $headers=[]) : RestClient {
         $client = clone $this;
         $client->url = $url;
         $client->handle = curl_init();
@@ -173,11 +173,11 @@ class RestClient implements Iterator, ArrayAccess {
         else
             $parameters_string = (string) $parameters;
         
-        if(strtoupper($method) == 'POST'){
+        if(strtoupper($method) === 'POST'){
             $curlopt[CURLOPT_POST] = TRUE;
             $curlopt[CURLOPT_POSTFIELDS] = $parameters_string;
         }
-        elseif(strtoupper($method) != 'GET'){
+        elseif(strtoupper($method) !== 'GET'){
             $curlopt[CURLOPT_CUSTOMREQUEST] = strtoupper($method);
             $curlopt[CURLOPT_POSTFIELDS] = $parameters_string;
         }
@@ -187,7 +187,7 @@ class RestClient implements Iterator, ArrayAccess {
         }
         
         if($client->options['base_url']){
-            if($client->url[0] != '/' && substr($client->options['base_url'], -1) != '/')
+            if($client->url[0] !== '/' && !str_ends_with($client->options['base_url'], '/'))
                 $client->url = '/' . $client->url;
             $client->url = $client->options['base_url'] . $client->url;
         }
@@ -209,7 +209,7 @@ class RestClient implements Iterator, ArrayAccess {
         return $client;
     }
     
-    public function parse_response($response){
+    public function parse_response($response) : void {
         $headers = [];
         $this->response_status_lines = [];
         $line = strtok($response, "\n");
@@ -218,14 +218,14 @@ class RestClient implements Iterator, ArrayAccess {
                 // Since we tokenize on \n, use the remaining \r to detect empty lines.
                 if(count($headers) > 0) break; // Must be the newline after headers, move on to response body
             }
-            elseif(strpos($line, 'HTTP') === 0){
+            elseif(str_starts_with($line, 'HTTP')){
                 // One or more HTTP status lines
                 $this->response_status_lines[] = trim($line);
             }
             else { 
                 // Has to be a header
-                list($key, $value) = explode(':', $line, 2);
-                $key = trim(strtolower(str_replace('-', '_', $key)));
+                [$key, $value] = explode(':', $line, 2);
+                $key = strtolower(trim(str_replace('-', '_', $key)));
                 $value = trim($value);
                 
                 if(empty($headers[$key]))
@@ -241,7 +241,7 @@ class RestClient implements Iterator, ArrayAccess {
         $this->response = strtok("");
     }
     
-    public function get_response_format(){
+    public function get_response_format() : string {
         if(!$this->response)
             throw new RestClientException(
                 "A response must exist before it can be decoded.");
@@ -259,7 +259,7 @@ class RestClient implements Iterator, ArrayAccess {
             "Response format could not be determined.");
     }
     
-    public function decode_response(){
+    public function decode_response() : mixed {
         if(empty($this->decoded_response)){
             $format = $this->get_response_format();
             if(!array_key_exists($format, $this->options['decoders']))

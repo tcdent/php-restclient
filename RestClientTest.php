@@ -1,5 +1,7 @@
 <?php
 
+use PHPUnit\Framework\TestCase;
+
 // Test are comprised of two components: a simple json response for testing
 // interaction via the built-in PHP server, and PHPUnit test methods. 
 
@@ -8,14 +10,14 @@
 // JSON debug information for validating behavior. 
 if(php_sapi_name() == 'cli-server'){
     header("Content-Type: application/json");
-    die(json_encode(array(
+    die(json_encode([
         'SERVER' => $_SERVER, 
         'REQUEST' => $_REQUEST, 
         'POST' => $_POST, 
         'GET' => $_GET, 
         'body' => file_get_contents('php://input'), 
         'headers' => getallheaders()
-    )));
+    ]));
 }
 
 
@@ -28,9 +30,9 @@ require 'restclient.php';
 if(!isset($TEST_SERVER_URL))
     $TEST_SERVER_URL = "http://localhost:8888"; 
 
-class RestClientTest extends PHPUnit_Framework_TestCase {
+class RestClientTest extends TestCase {
     
-    public function test_get(){
+    public function test_get() : void {
         global $TEST_SERVER_URL;
         
         $api = new RestClient;
@@ -47,7 +49,7 @@ class RestClientTest extends PHPUnit_Framework_TestCase {
             $response_json->body);
     }
     
-    public function test_post(){
+    public function test_post() : void {
         global $TEST_SERVER_URL;
         
         $api = new RestClient;
@@ -62,7 +64,7 @@ class RestClientTest extends PHPUnit_Framework_TestCase {
             $response_json->body);
     }
     
-    public function test_put(){
+    public function test_put() : void {
         global $TEST_SERVER_URL;
         
         $api = new RestClient;
@@ -76,7 +78,7 @@ class RestClientTest extends PHPUnit_Framework_TestCase {
             $response_json->body);
     }
     
-    public function test_delete(){
+    public function test_delete() : void {
         global $TEST_SERVER_URL;
         
         $api = new RestClient;
@@ -90,7 +92,7 @@ class RestClientTest extends PHPUnit_Framework_TestCase {
             $response_json->body);
     }
     
-    public function test_user_agent(){
+    public function test_user_agent() : void {
         global $TEST_SERVER_URL;
         
         $api = new RestClient(array(
@@ -103,7 +105,7 @@ class RestClientTest extends PHPUnit_Framework_TestCase {
             $response_json->headers->{"User-Agent"});
     }
     
-    public function test_json_patch(){
+    public function test_json_patch() : void {
         global $TEST_SERVER_URL;
         
         $api = new RestClient;
@@ -124,7 +126,7 @@ class RestClientTest extends PHPUnit_Framework_TestCase {
             $response_json->body);
     }
     
-    public function test_json_post(){
+    public function test_json_post() : void {
         global $TEST_SERVER_URL;
         
         $api = new RestClient;
@@ -140,7 +142,7 @@ class RestClientTest extends PHPUnit_Framework_TestCase {
             $response_json->body);
     }
     
-    public function test_multiheader_response(){
+    public function test_multiheader_response() : void {
         $RESPONSE = "HTTP/1.1 200 OK\r\nContent-type: text/json\r\nContent-Type: application/json\r\n\r\nbody";
         
         $api = new RestClient;
@@ -155,7 +157,7 @@ class RestClientTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("body", $api->response);
     }
     
-    public function test_multistatus_response(){
+    public function test_multistatus_response() : void {
         $RESPONSE = "HTTP/1.1 100 Continue\r\n\r\nHTTP/1.1 200 OK\r\nCache-Control: no-cache\r\nContent-Type: application/json\r\n\r\nbody";
         
         $api = new RestClient;
@@ -171,7 +173,7 @@ class RestClientTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("body", $api->response);
     }
     
-    public function test_status_only_response(){
+    public function test_status_only_response() : void {
         $RESPONSE = "HTTP/1.1 100 Continue\r\n\r\n";
         
         $api = new RestClient;
@@ -184,7 +186,7 @@ class RestClientTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("", $api->response);
     }
     
-    public function test_build_indexed_queries(){
+    public function test_build_indexed_queries() : void {
         global $TEST_SERVER_URL;
         
         $api = new RestClient(['build_indexed_queries' => TRUE]);
@@ -197,7 +199,7 @@ class RestClientTest extends PHPUnit_Framework_TestCase {
             $response_json->SERVER->QUERY_STRING);
     }
     
-    public function test_build_non_indexed_queries(){
+    public function test_build_non_indexed_queries() : void {
         global $TEST_SERVER_URL;
         
         $api = new RestClient;

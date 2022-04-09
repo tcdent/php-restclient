@@ -1,12 +1,14 @@
 PHP REST Client
 ===============
 https://github.com/tcdent/php-restclient  
-(c) 2013-2017 Travis Dent <tcdent@gmail.com>  
+(c) 2013-2022 Travis Dent <tcdent@gmail.com>  
 
 Installation
 -----------
+Requires PHP 8.0 or above. Use [0.1.7](https://github.com/tcdent/php-restclient/releases/tag/0.1.7) for legacy versions of PHP. 
+
 ``` sh
-$ php composer.phar require tcdent/php-restclient
+$ composer require tcdent/php-restclient
 ```
 
 
@@ -240,8 +242,8 @@ Tests
 The test package includes a simple server script which returns debug information for verifying functionality. Start the server first, then run tests:
 
 ``` sh
-$ php -S localhost:8888 test.php
-$ phpunit test
+$ php -S localhost:8888 RestClientTest.php
+$ phpunit RestClientTest
 ```
 
 * Requires PHP > 5.5.7 in order for `getallheaders` data to populate.
