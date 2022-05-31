@@ -212,7 +212,7 @@ class RestClient implements Iterator, ArrayAccess {
     public function parse_response($response) : void {
         $headers = [];
         $this->response_status_lines = [];
-        $line = strtok($response, "\n");
+        $line = strtok((string)$response, "\n");
         do {
             if(strlen(trim($line)) == 0){
                 // Since we tokenize on \n, use the remaining \r to detect empty lines.
