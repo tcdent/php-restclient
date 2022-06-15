@@ -201,7 +201,9 @@ class RestClient implements Iterator, ArrayAccess {
         }
         curl_setopt_array($client->handle, $curlopt);
         
-        $client->parse_response(curl_exec($client->handle));
+        $response = curl_exec($client->handle);
+        if($response !== FALSE)
+            $client->parse_response($response);
         $client->info = (object) curl_getinfo($client->handle);
         $client->error = curl_error($client->handle);
         
