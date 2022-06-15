@@ -1,5 +1,7 @@
 PHP REST Client
 ===============
+[![Total Downloads](http://poser.pugx.org/tcdent/php-restclient/downloads)](https://packagist.org/packages/tcdent/php-restclient)
+
 https://github.com/tcdent/php-restclient  
 (c) 2013-2022 Travis Dent <tcdent@gmail.com>  
 
