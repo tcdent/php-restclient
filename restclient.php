@@ -208,6 +208,7 @@ class RestClient implements Iterator, ArrayAccess {
         $client->error = curl_error($client->handle);
         
         curl_close($client->handle);
+        
         return $client;
     }
     
@@ -241,6 +242,7 @@ class RestClient implements Iterator, ArrayAccess {
         
         $this->headers = (object) $headers;
         $this->response = strtok("");
+        strtok("", ""); // Clean strtok buffer from memory
     }
     
     public function get_response_format() : string {
