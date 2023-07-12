@@ -12,6 +12,7 @@ class RestClient implements Iterator, ArrayAccess {
     
     public $options;
     public $handle; // cURL resource handle.
+    public $url;
     
     // Populated after execution:
     public $response; // Response body.
