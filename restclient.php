@@ -149,7 +149,7 @@ class RestClient implements Iterator, ArrayAccess {
             $headers = array_merge($client->options['headers'], $headers);
             foreach($headers as $key => $values){
                 foreach(is_array($values)? $values : [$values] as $value){
-                    $curlopt[CURLOPT_HTTPHEADER][] = sprintf("%s:%s", $key, $value);
+                    $curlopt[CURLOPT_HTTPHEADER][] = sprintf("%s: %s", $key, $value);
                 }
             }
         }
