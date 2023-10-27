@@ -211,6 +211,39 @@ class RestClientTest extends TestCase {
         $this->assertEquals("foo=+bar&baz=1&bat%5B%5D=foo&bat%5B%5D=bar&bat%5B%5D=baz%5B12%5D", 
             $response_json->SERVER->QUERY_STRING);
     }
+
+    public function test_empty_base_url() : void {
+        global $TEST_SERVER_URL;
+
+        $api = new RestClient(
+            ['base_url' => null]
+        );
+        $result = $api->get($TEST_SERVER_URL);
+        $this->assertEquals(200, $result->info->http_code);
+    }
+
+    public function test_empty_url() : void {
+        global $TEST_SERVER_URL;
+
+        $api = new RestClient(
+            ['base_url' => $TEST_SERVER_URL]
+        );
+        $result = $api->get('');
+        $this->assertEquals(200, $result->info->http_code);
+    }
+
+    public function test_null_url() : void {
+        global $TEST_SERVER_URL;
+
+        $api = new RestClient(
+            ['base_url' => $TEST_SERVER_URL]
+        );
+        try {
+            $result = $api->get(null);
+        } catch (TypeError $e) {
+            $this->assertEquals(TypeError::class, get_class($e));
+        }
+    }
 }
 
 

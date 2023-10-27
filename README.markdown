@@ -245,7 +245,7 @@ The test package includes a simple server script which returns debug information
 
 ``` sh
 $ php -S localhost:8888 RestClientTest.php
-$ phpunit RestClientTest
+$ phpunit RestClientTest.php
 ```
 
 * Requires PHP > 5.5.7 in order for `getallheaders` data to populate.
