@@ -3,4 +3,4 @@
 namespace RestClient;
 
 // TODO: complete this implementation
-class Attributes {}
+trait Attributes {}
