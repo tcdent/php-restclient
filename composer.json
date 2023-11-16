@@ -34,5 +34,8 @@
         "psr-4": {
             "RestClient\\": "src/RestClient"
         }
+    }, 
+    "scripts": {
+        "test": "phpunit tests"
     }
 }
