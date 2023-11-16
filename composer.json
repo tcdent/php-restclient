@@ -17,12 +17,12 @@
         "issues": "http://github.com/tcdent/php-restclient/issues"
     }, 
     "require": {
-        "php": ">=8.2", 
+        "php": ">=8.3", 
         "ext-curl": "*", 
         "ext-json": "*"
     }, 
     "require-dev": {
-        "php": ">=8.2", 
+        "php": ">=8.3", 
         "phpunit/phpunit": ">=9.6"
     }, 
     "autoload": {

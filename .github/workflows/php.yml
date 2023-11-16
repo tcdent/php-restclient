@@ -17,6 +17,14 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.3'
+        extensions: curl, json
+        coverage: xdebug
+        tools: php-cs-fixer, phpunit
+
     - name: Validate composer.json and composer.lock
       run: composer validate
 
