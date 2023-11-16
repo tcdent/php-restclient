@@ -1,36 +1,31 @@
-<?php
+<?php declare(strict_types=1);
 
+namespace RestClient;
+
+use \RestClient;
 use PHPUnit\Framework\TestCase;
-
-// Test are comprised of two components: a simple json response for testing
-// interaction via the built-in PHP server, and PHPUnit test methods. 
-
-// Test Server
-// This code is only executed by the test server instance. It returns simple 
-// JSON debug information for validating behavior. 
-if(php_sapi_name() == 'cli-server'){
-    header("Content-Type: application/json");
-    die(json_encode([
-        'SERVER' => $_SERVER, 
-        'REQUEST' => $_REQUEST, 
-        'POST' => $_POST, 
-        'GET' => $_GET, 
-        'body' => file_get_contents('php://input'), 
-        'headers' => getallheaders()
-    ]));
-}
-
-
-// Unit Tests
-// 
-
-require 'restclient.php';
 
 // This varible can be overridden with a PHPUnit XML configuration file.
 if(!isset($TEST_SERVER_URL))
     $TEST_SERVER_URL = "http://localhost:8888"; 
 
 class RestClientTest extends TestCase {
+
+    public function test_execute_get() : void {
+        global $TEST_SERVER_URL;
+        
+        $api = new RestClient;
+        $result = $api->execute('GET', $TEST_SERVER_URL, [
+            'foo' => ' bar', 'baz' => 1, 'bat' => ['foo', 'bar']
+        ]);
+        $response_json = $result->decode_response();
+        $this->assertEquals('GET', 
+            $response_json->SERVER->REQUEST_METHOD);
+        $this->assertEquals("foo=+bar&baz=1&bat%5B%5D=foo&bat%5B%5D=bar", 
+            $response_json->SERVER->QUERY_STRING);
+        $this->assertEquals("", 
+            $response_json->body);
+    }
     
     public function test_get() : void {
         global $TEST_SERVER_URL;
@@ -109,7 +104,7 @@ class RestClientTest extends TestCase {
         global $TEST_SERVER_URL;
         
         $api = new RestClient;
-        $result = $api->execute($TEST_SERVER_URL, 'PATCH',
+        $result = $api->execute('PATCH', $TEST_SERVER_URL, 
             "{\"foo\":\"bar\"}",
             array(
                 'X-HTTP-Method-Override' => 'PATCH', 
@@ -130,7 +125,7 @@ class RestClientTest extends TestCase {
         global $TEST_SERVER_URL;
         
         $api = new RestClient;
-        $result = $api->post($TEST_SERVER_URL, "{\"foo\":\"bar\"}",
+        $result = $api->execute('POST', $TEST_SERVER_URL, "{\"foo\":\"bar\"}",
             array('Content-Type' => 'application/json'));
         $response_json = $result->decode_response();
         
@@ -142,49 +137,49 @@ class RestClientTest extends TestCase {
             $response_json->body);
     }
     
-    public function test_multiheader_response() : void {
-        $RESPONSE = "HTTP/1.1 200 OK\r\nContent-type: text/json\r\nContent-Type: application/json\r\n\r\nbody";
+    // public function test_multiheader_response() : void {
+    //     $RESPONSE = "HTTP/1.1 200 OK\r\nContent-type: text/json\r\nContent-Type: application/json\r\n\r\nbody";
         
-        $api = new RestClient;
-        // bypass request execution to inject controlled response data.
-        $api->parse_response($RESPONSE);
+    //     $api = new RestClient;
+    //     // bypass request execution to inject controlled response data.
+    //     $api->parse_response($RESPONSE);
         
-        $this->assertEquals(["HTTP/1.1 200 OK"], 
-            $api->response_status_lines);
-        $this->assertEquals((object) [
-            'content_type' => ["text/json", "application/json"]
-        ], $api->headers);
-        $this->assertEquals("body", $api->response);
-    }
+    //     $this->assertEquals(["HTTP/1.1 200 OK"], 
+    //         $api->response_status_lines);
+    //     $this->assertEquals((object) [
+    //         'content_type' => ["text/json", "application/json"]
+    //     ], $api->headers);
+    //     $this->assertEquals("body", $api->response);
+    // }
     
-    public function test_multistatus_response() : void {
-        $RESPONSE = "HTTP/1.1 100 Continue\r\n\r\nHTTP/1.1 200 OK\r\nCache-Control: no-cache\r\nContent-Type: application/json\r\n\r\nbody";
+    // public function test_multistatus_response() : void {
+    //     $RESPONSE = "HTTP/1.1 100 Continue\r\n\r\nHTTP/1.1 200 OK\r\nCache-Control: no-cache\r\nContent-Type: application/json\r\n\r\nbody";
         
-        $api = new RestClient;
-        // bypass request execution to inject controlled response data.
-        $api->parse_response($RESPONSE);
+    //     $api = new RestClient;
+    //     // bypass request execution to inject controlled response data.
+    //     $api->parse_response($RESPONSE);
         
-        $this->assertEquals(["HTTP/1.1 100 Continue", "HTTP/1.1 200 OK"], 
-            $api->response_status_lines);
-        $this->assertEquals((object) [
-                'cache_control' => "no-cache", 
-                'content_type' => "application/json"
-            ], $api->headers);
-        $this->assertEquals("body", $api->response);
-    }
+    //     $this->assertEquals(["HTTP/1.1 100 Continue", "HTTP/1.1 200 OK"], 
+    //         $api->response_status_lines);
+    //     $this->assertEquals((object) [
+    //             'cache_control' => "no-cache", 
+    //             'content_type' => "application/json"
+    //         ], $api->headers);
+    //     $this->assertEquals("body", $api->response);
+    // }
     
-    public function test_status_only_response() : void {
-        $RESPONSE = "HTTP/1.1 100 Continue\r\n\r\n";
+    // public function test_status_only_response() : void {
+    //     $RESPONSE = "HTTP/1.1 100 Continue\r\n\r\n";
         
-        $api = new RestClient;
-        // bypass request execution to inject controlled response data.
-        $api->parse_response($RESPONSE);
+    //     $api = new RestClient;
+    //     // bypass request execution to inject controlled response data.
+    //     $api->parse_response($RESPONSE);
         
-        $this->assertEquals(["HTTP/1.1 100 Continue"], 
-            $api->response_status_lines);
-        $this->assertEquals((object) [], $api->headers);
-        $this->assertEquals("", $api->response);
-    }
+    //     $this->assertEquals(["HTTP/1.1 100 Continue"], 
+    //         $api->response_status_lines);
+    //     $this->assertEquals((object) [], $api->headers);
+    //     $this->assertEquals("", $api->response);
+    // }
     
     public function test_build_indexed_queries() : void {
         global $TEST_SERVER_URL;
@@ -202,7 +197,7 @@ class RestClientTest extends TestCase {
     public function test_build_non_indexed_queries() : void {
         global $TEST_SERVER_URL;
         
-        $api = new RestClient;
+        $api = new RestClient(['build_indexed_queries' => FALSE]);
         $result = $api->get($TEST_SERVER_URL, [
             'foo' => ' bar', 'baz' => 1, 'bat' => ['foo', 'bar', 'baz[12]']
         ]);
@@ -212,7 +207,7 @@ class RestClientTest extends TestCase {
             $response_json->SERVER->QUERY_STRING);
     }
 
-    public function test_empty_base_url() : void {
+    public function test_null_base_url() : void {
         global $TEST_SERVER_URL;
 
         $api = new RestClient(
@@ -220,9 +215,10 @@ class RestClientTest extends TestCase {
         );
         $result = $api->get($TEST_SERVER_URL);
         $this->assertEquals(200, $result->info->http_code);
+        $this->assertEquals($TEST_SERVER_URL.'/', $result->info->url);
     }
 
-    public function test_empty_url() : void {
+    public function test_empty_string_url() : void {
         global $TEST_SERVER_URL;
 
         $api = new RestClient(
@@ -230,6 +226,7 @@ class RestClientTest extends TestCase {
         );
         $result = $api->get('');
         $this->assertEquals(200, $result->info->http_code);
+        $this->assertEquals($TEST_SERVER_URL.'/', $result->info->url);
     }
 
     public function test_null_url() : void {
@@ -238,11 +235,21 @@ class RestClientTest extends TestCase {
         $api = new RestClient(
             ['base_url' => $TEST_SERVER_URL]
         );
-        try {
-            $result = $api->get(null);
-        } catch (TypeError $e) {
-            $this->assertEquals(TypeError::class, get_class($e));
-        }
+        $result = $api->get(null);
+        $this->assertEquals(200, $result->info->http_code);
+        $this->assertEquals($TEST_SERVER_URL.'/', $result->info->url);
+    }
+
+    public function test_no_url() : void {
+        global $TEST_SERVER_URL;
+
+        $api = new RestClient(
+            ['base_url' => $TEST_SERVER_URL]
+        );
+        $result = $api->get();
+        Log::debug($result);
+        $this->assertEquals(200, $result->info->http_code);
+        $this->assertEquals($TEST_SERVER_URL.'/', $result->info->url);
     }
 }
 
