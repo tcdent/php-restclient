@@ -11,9 +11,9 @@ $ composer require tcdent/php-restclient
 ```
 
 ## Upgrading from 0.1.x
-The public API has been kept very stable through this project's lifetime, so upgrading should be fairly eventless. Expect deprecation warnings for features that are no longer supported.
+The public API has been kept stable so upgrading should be fairly eventless. Expect deprecation warnings for uses that are no longer encouraged.
 
-See [Backwards-incompatible changes in RestClient 2](#Backwards-incompatible-changes-in-RestClient-2) for details on the limited number of breaking changes from 0.1.9.
+See [Backwards-incompatible changes in RestClient 2](#Backwards-incompatible-changes-in-RestClient-2) for breaking changes from 0.1.9.
 
 # `RestClient`
 The `RestClient` class is the main interface for making requests and can be used directly for fast implementation. 
@@ -33,7 +33,7 @@ if($response->success) {
 }
 ```
 
-Skip ahead to [`RestClient\Response`](#RestClientResponse) for details on accessing the response data.
+Skip to [`RestClient\Response`](#RestClientResponse) for explanation of the response object.
 
 ## Subclassing
 Fully documented interfaces can be configured using subclassing if desired. See the GitHub implementation in the `examples/GitHub` directory for a more complete example.
@@ -244,7 +244,7 @@ $response = $api->get('/');
 ```
 
 ## Determining Success
-Two boolean attributes to help determine the success of a request: `success` and `fail`. `success` is `TRUE` if the response status code is between 200 and 299, inclusive. `fail` is the inverse of `success`. `status_code` is also available for explicit comparisons.
+Two boolean attributes to help determine the success of a request: `success` and `fail`. `success` is `TRUE` if the response status code is between 200 and 299. `fail` is the inverse of `success`. `status_code` is also available for explicit comparisons.
 
 ``` php
 if($response->success)
@@ -400,7 +400,7 @@ deprecation warning will not be raised.
 
 - `RestClient::execute()` now returns a `RestClient\Response` object instead of a clone of `RestClient`.
 - `RestClient\Params`, `RestClient\Headers`, and `RestClient\Resource` are now fully abstracted and parse/reconstruct data on demand.
-- Annotations are now supported for constraining parameters and headers in subclasses.
+- Annotations are now supported for constraining parameters and headers in subclasses allowing for explicitly defined endpoints.
 - cURL requests are now performed with a shared handle, reducing overhead.
 - Tests have been expanded and improved, including a harness for backwards compatibility.
 - Exceptions are now namespaced and more specific.
