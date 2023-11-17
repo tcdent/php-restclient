@@ -33,7 +33,7 @@ if($response->success) {
 }
 ```
 
-Skip ahead to [`RestClient\Response`](#RestClient\Response) for details on accessing the response data.
+Skip ahead to [`RestClient\Response`](#RestClientResponse) for details on accessing the response data.
 
 ## Subclassing
 Fully documented interfaces can be configured using subclassing if desired. See the GitHub implementation in the `examples/GitHub` directory for a more complete example.
