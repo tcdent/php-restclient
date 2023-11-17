@@ -9,7 +9,7 @@ use PHPUnit\Framework\TestCase;
 if(!isset($TEST_SERVER_URL))
     $TEST_SERVER_URL = "http://localhost:8888"; 
 
-class RestClientTest extends TestCase {
+class BackwardsCompatibilityTest extends TestCase {
 
     public function test_execute_get() : void {
         global $TEST_SERVER_URL;
