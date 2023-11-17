@@ -44,7 +44,7 @@ jobs:
 
     # run the test server for the application's tests
     - name: Start the test server
-      run: php -S localhost:8080 tests/server.php &
+      run: php -S localhost:8888 tests/server.php &
 
     - name: Run test suite
       run: phpunit tests
