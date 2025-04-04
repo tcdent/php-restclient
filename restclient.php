@@ -243,8 +243,7 @@ class RestClient implements Iterator, ArrayAccess {
     
     public function get_response_format() : string {
         if(!$this->response)
-            throw new RestClientException(
-                "A response must exist before it can be decoded.");
+            throw new RestClientException($this->error);
         
         // User-defined format. 
         if(!empty($this->options['format']))
